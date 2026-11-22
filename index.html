@@ -1,0 +1,3981 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="charter">
+  <title>نظام إدارة الغياب اليومي للحصص — مدرسة صلالة للتعليم (١٠–١٢) بنين</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* Page and surfaces (Charter warm paper + bright leaf) */
+      --background: #f7f4ec;
+      --surface-container-low: #fffdf8;
+      --surface-container: #ece5d4;
+      --surface-container-high: #e3dac4;
+
+      /* Ink */
+      --on-surface: #161b26;
+      --on-surface-variant: #464e5e;
+
+      /* Royal Gold / Brass rules */
+      --outline: #b38936;
+      --outline-variant: #d9cfb8;
+
+      /* Royal Palette: Royal Navy, Emerald, Ruby, Burnished Gold */
+      --primary: #142b5c;
+      --primary-hover: #0e1f44;
+      --on-primary: #fffdf8;
+      --primary-container: #e4eaf6;
+      --on-primary-container: #142b5c;
+
+      --secondary: #0f6b4a;
+      --secondary-hover: #0a5238;
+      --on-secondary: #ffffff;
+      --secondary-container: #e3f5ed;
+      --on-secondary-container: #0a4d35;
+
+      --tertiary: #7c5b19;
+      --tertiary-container: #f9f1dc;
+
+      --error: #a61c28;
+      --error-hover: #87141f;
+      --on-error: #ffffff;
+      --error-container: #fbe8ea;
+      --on-error-container: #7c131c;
+
+      --positive: #0f6b4a;
+      --warning: #8f5310;
+      --warning-container: #fdf3e3;
+      --focus: #142b5c;
+
+      /* Data visualization series */
+      --data-1: #142b5c;
+      --data-2: #0f6b4a;
+      --data-3: #a61c28;
+      --data-4: #b38936;
+      --data-context: #c2bba9;
+
+      /* Avatar tokens */
+      --avatar-bg-top: #e8eef8;
+      --avatar-bg-bottom: #f6efe0;
+      --avatar-dishdasha: #fcfdff;
+      --avatar-dishdasha-shade: #dce3ef;
+      --avatar-skin-1: #e4b593;
+      --avatar-skin-2: #d29c76;
+      --avatar-skin-3: #bc825d;
+      --avatar-hair: #1f1a17;
+      --avatar-kummah-1: #142b5c;
+      --avatar-kummah-2: #0f6b4a;
+      --avatar-kummah-3: #8e1e29;
+      --avatar-kummah-4: #8a641d;
+
+      /* Typography */
+      --font-headline: 'Cairo', 'Noto Naskh Arabic', sans-serif;
+      --font-body: 'Cairo', 'Noto Naskh Arabic', sans-serif;
+      --font-label: 'Cairo', 'Noto Naskh Arabic', sans-serif;
+      --font-print: 'Adobe Arabic', 'Noto Naskh Arabic', 'Cairo', serif;
+
+      --display-size: clamp(1.5rem, 1.25rem + 0.9vw, 2rem);
+      --headline-size: clamp(1.1875rem, 1.05rem + 0.45vw, 1.4375rem);
+      --subhead-size: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.12vw, 1rem);
+      --label-size: 0.78rem;
+
+      /* Spacing scale (4pt base) */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.25rem;
+      --space-2xl: 3.5rem;
+
+      /* Shape (Charter crisp architectural corners) */
+      --rounded: 0.25rem;
+      --rounded-lg: 0.375rem;
+      --rounded-full: 0.25rem;
+
+      /* Effects */
+      --brass-rule: 2px solid var(--outline);
+      --brass-rule-thick: 3px solid var(--outline);
+      --hairline: 1px solid var(--outline-variant);
+      --leaf-shadow: 0 2px 8px rgba(20, 43, 92, 0.06);
+      --card-elevated: 0 10px 28px rgba(20, 43, 92, 0.10);
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.6;
+    }
+
+    header { position: static !important; }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    /* Royal Charter Header Band */
+    .app-header {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-bottom: var(--brass-rule-thick);
+      padding: var(--space-md) var(--space-lg);
+    }
+
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .brand-crest {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      background: var(--primary-hover);
+      border: 1px solid var(--outline);
+      border-radius: var(--rounded);
+      color: var(--outline);
+    }
+
+    .brand-titles h1 {
+      margin: 0;
+      font-family: var(--font-headline);
+      font-size: var(--headline-size);
+      font-weight: 700;
+      color: var(--on-primary);
+      line-height: 1.25;
+    }
+
+    .brand-subtitle {
+      margin: 0;
+      font-size: var(--label-size);
+      color: var(--outline-variant);
+    }
+
+    .header-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    /* Numeral Switcher (Visible to all users) */
+    .numeral-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      background: var(--primary-hover);
+      border: 1px solid var(--outline);
+      border-radius: var(--rounded);
+      padding: 0.25rem;
+    }
+
+    .numeral-toggle-label {
+      font-size: var(--label-size);
+      color: var(--outline-variant);
+      padding: 0 var(--space-xs);
+      white-space: nowrap;
+    }
+
+    .numeral-btn {
+      min-height: 36px;
+      padding: 0.3rem 0.7rem;
+      border: none;
+      border-radius: var(--rounded);
+      background: transparent;
+      color: var(--on-primary);
+      font-size: var(--label-size);
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color var(--dur-micro) var(--ease-in-out), color var(--dur-micro) var(--ease-in-out);
+    }
+
+    .numeral-btn[aria-pressed="true"] {
+      background: var(--outline);
+      color: var(--primary);
+    }
+
+    .numeral-btn:hover:not([aria-pressed="true"]) {
+      background: rgba(255, 253, 248, 0.12);
+    }
+
+    .user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      background: rgba(255, 253, 248, 0.08);
+      border: 1px solid rgba(217, 207, 184, 0.35);
+      border-radius: var(--rounded);
+      padding: 0.35rem 0.75rem;
+      font-size: var(--label-size);
+      color: var(--on-primary);
+    }
+
+    .save-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: var(--label-size);
+      color: var(--secondary-container);
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--rounded);
+      background: rgba(15, 107, 74, 0.35);
+      border: 1px solid rgba(227, 245, 237, 0.25);
+    }
+
+    /* Main Container */
+    .page-grid {
+      display: grid;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      max-width: 1320px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .page-grid * { min-width: 0; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      min-height: 44px;
+      padding: 0.55rem 1.1rem;
+      border-radius: var(--rounded);
+      border: 1px solid transparent;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color var(--dur-micro) var(--ease-in-out), color var(--dur-micro) var(--ease-in-out), border-color var(--dur-micro) var(--ease-in-out), opacity var(--dur-micro) var(--ease-in-out);
+    }
+
+    .btn:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-container-low);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--primary-container);
+    }
+
+    .btn-emerald {
+      background: var(--secondary);
+      color: var(--on-secondary);
+      border-color: var(--secondary);
+    }
+    .btn-emerald:hover:not(:disabled) {
+      background: var(--secondary-hover);
+    }
+
+    .btn-ruby {
+      background: var(--error);
+      color: var(--on-error);
+      border-color: var(--error);
+    }
+    .btn-ruby:hover:not(:disabled) {
+      background: var(--error-hover);
+    }
+
+    .btn-gold-outline {
+      background: var(--surface-container-low);
+      color: var(--tertiary);
+      border-color: var(--outline);
+    }
+    .btn-gold-outline:hover:not(:disabled) {
+      background: var(--tertiary-container);
+    }
+
+    .btn-ghost-light {
+      background: transparent;
+      color: var(--on-primary);
+      border-color: var(--outline-variant);
+      min-height: 40px;
+      padding: 0.4rem 0.85rem;
+    }
+    .btn-ghost-light:hover:not(:disabled) {
+      background: rgba(255, 253, 248, 0.14);
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 0.3rem 0.7rem;
+      font-size: var(--label-size);
+    }
+
+    /* Form Fields */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .field-label {
+      font-size: var(--label-size);
+      font-weight: 700;
+      color: var(--on-surface-variant);
+    }
+
+    .input-control, .select-control, .textarea-control {
+      width: 100%;
+      min-height: 44px;
+      padding: 0.5rem 0.75rem;
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded);
+      transition: border-color var(--dur-micro) var(--ease-in-out), box-shadow var(--dur-micro) var(--ease-in-out);
+    }
+
+    .select-control {
+      padding-left: 2rem;
+    }
+
+    .textarea-control {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    .input-control:focus, .select-control:focus, .textarea-control:focus {
+      border-color: var(--primary);
+      outline: 2px solid var(--primary-container);
+    }
+
+    .form-row-aligned {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: var(--space-md);
+    }
+
+    /* Charter Figure Cards & Panels */
+    .charter-panel {
+      background: var(--surface-container-low);
+      border-top: var(--brass-rule);
+      border-right: var(--hairline);
+      border-left: var(--hairline);
+      border-bottom: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      box-shadow: var(--leaf-shadow);
+    }
+
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      border-bottom: var(--hairline);
+      padding-bottom: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .section-head h2, .section-head h3 {
+      margin: 0;
+      font-family: var(--font-headline);
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+
+    .figure-card {
+      background: var(--surface-container-low);
+      border-top: var(--brass-rule);
+      border-right: var(--hairline);
+      border-left: var(--hairline);
+      border-bottom: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .figure-card.accent-emerald { border-top-color: var(--secondary); }
+    .figure-card.accent-ruby { border-top-color: var(--error); }
+    .figure-card.accent-navy { border-top-color: var(--primary); }
+
+    .figure-label {
+      font-size: var(--label-size);
+      font-weight: 600;
+      color: var(--on-surface-variant);
+    }
+
+    .figure-value {
+      font-size: var(--display-size);
+      font-weight: 700;
+      color: var(--on-surface);
+      font-variant-numeric: tabular-nums lining-nums;
+      line-height: 1.2;
+    }
+
+    .figure-note {
+      font-size: var(--label-size);
+      color: var(--tertiary);
+      font-weight: 600;
+    }
+
+    /* Login & Forced Password Change View */
+    .auth-shell {
+      display: grid;
+      place-items: center;
+      padding: var(--space-xl) var(--space-md);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 500px;
+      background: var(--surface-container-low);
+      border-top: var(--brass-rule-thick);
+      border-right: var(--hairline);
+      border-left: var(--hairline);
+      border-bottom: var(--hairline);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--card-elevated);
+      overflow: hidden;
+    }
+
+    .auth-banner {
+      background: var(--primary);
+      color: var(--on-primary);
+      padding: var(--space-lg);
+      border-bottom: var(--brass-rule);
+    }
+
+    .auth-banner h2 {
+      margin: 0 0 0.25rem;
+      font-size: var(--headline-size);
+      font-weight: 700;
+    }
+
+    .auth-banner p {
+      margin: 0;
+      font-size: var(--label-size);
+      color: var(--outline-variant);
+    }
+
+    .auth-body {
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    /* Equal-width single-line role toggle buttons */
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+      background: var(--surface-container);
+      padding: var(--space-xs);
+      border-radius: var(--rounded);
+      border: var(--hairline);
+    }
+
+    .role-option-btn {
+      min-height: 46px;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid transparent;
+      border-radius: var(--rounded);
+      background: transparent;
+      color: var(--on-surface);
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      white-space: nowrap;
+      text-align: center;
+      transition: background-color var(--dur-micro) var(--ease-in-out), color var(--dur-micro) var(--ease-in-out), border-color var(--dur-micro) var(--ease-in-out);
+    }
+
+    .role-option-btn[aria-pressed="true"] {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--outline);
+    }
+
+    .role-option-btn:hover:not([aria-pressed="true"]) {
+      background: var(--surface-container-low);
+    }
+
+    .password-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-wrap .input-control {
+      padding-left: 3rem;
+    }
+
+    .password-eye-btn {
+      position: absolute;
+      left: 0.35rem;
+      min-width: 36px;
+      min-height: 36px;
+      border: none;
+      background: transparent;
+      color: var(--on-surface-variant);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      border-radius: var(--rounded);
+    }
+
+    .password-eye-btn:hover {
+      background: var(--surface-container);
+      color: var(--primary);
+    }
+
+    .credential-note {
+      background: var(--surface-container);
+      border-right: 3px solid var(--outline);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+    }
+
+    /* Inline Alerts */
+    .inline-alert {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-right: 4px solid transparent;
+    }
+    .inline-alert.error {
+      background: var(--error-container);
+      color: var(--on-error-container);
+      border-right-color: var(--error);
+    }
+    .inline-alert.success {
+      background: var(--secondary-container);
+      color: var(--on-secondary-container);
+      border-right-color: var(--secondary);
+    }
+    .inline-alert.warning {
+      background: var(--warning-container);
+      color: var(--warning);
+      border-right-color: var(--outline);
+    }
+
+    /* Supervisor Main Tabs & Sub-Tabs */
+    .main-tabs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      border-bottom: var(--brass-rule);
+      padding-bottom: var(--space-sm);
+    }
+
+    .main-tab-btn {
+      min-height: 46px;
+      padding: 0.6rem 1.4rem;
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded);
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      font-size: var(--subhead-size);
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background-color var(--dur-micro) var(--ease-in-out), color var(--dur-micro) var(--ease-in-out);
+    }
+
+    .main-tab-btn[aria-selected="true"] {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+    }
+
+    .sub-tabs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      background: var(--surface-container);
+      padding: var(--space-xs);
+      border-radius: var(--rounded);
+      border: var(--hairline);
+    }
+
+    .sub-tab-btn {
+      min-height: 42px;
+      padding: 0.45rem 1.1rem;
+      border: 1px solid transparent;
+      border-radius: var(--rounded);
+      background: transparent;
+      color: var(--on-surface-variant);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-in-out), color var(--dur-micro) var(--ease-in-out);
+    }
+
+    .sub-tab-btn[aria-selected="true"] {
+      background: var(--surface-container-low);
+      color: var(--primary);
+      border-color: var(--outline);
+    }
+
+    /* Badges & Status Pills */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--rounded);
+      font-size: var(--label-size);
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .badge-emerald {
+      background: var(--secondary-container);
+      color: var(--on-secondary-container);
+      border-color: var(--secondary);
+    }
+
+    .badge-ruby {
+      background: var(--error-container);
+      color: var(--on-error-container);
+      border-color: var(--error);
+    }
+
+    .badge-gold {
+      background: var(--tertiary-container);
+      color: var(--tertiary);
+      border-color: var(--outline);
+    }
+
+    .badge-navy {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      border-color: var(--primary);
+    }
+
+    /* Tables */
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      background: var(--surface-container-low);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+
+    th {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+      font-weight: 700;
+      font-size: var(--label-size);
+      padding: 0.7rem 0.65rem;
+      text-align: right;
+      border-bottom: var(--brass-rule);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.6rem 0.65rem;
+      border-bottom: var(--hairline);
+      vertical-align: middle;
+    }
+
+    tbody tr:hover td {
+      background: var(--primary-container);
+    }
+
+    /* Consolidated Report Table: protect summary columns from shrinking */
+    .report-table th.center, .report-table td.center {
+      text-align: center;
+    }
+
+    .report-table th.col-serial, .report-table td.col-serial {
+      width: 48px;
+      min-width: 48px;
+      text-align: center;
+    }
+
+    .report-table th.col-student, .report-table td.col-student {
+      min-width: 195px;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .report-table th.col-period, .report-table td.col-period {
+      width: 44px;
+      min-width: 44px;
+      text-align: center;
+      padding: 0.45rem 0.25rem;
+    }
+
+    .report-table th.col-total, .report-table td.col-total {
+      min-width: 112px;
+      width: 112px;
+      text-align: center;
+      white-space: nowrap;
+      font-weight: 700;
+      border-right: var(--hairline);
+    }
+
+    .cell-mark-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded);
+      background: var(--surface-container-low);
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .cell-mark-btn.mark-p {
+      background: var(--secondary-container);
+      color: var(--on-secondary-container);
+      border-color: var(--secondary);
+    }
+
+    .cell-mark-btn.mark-a {
+      background: var(--error-container);
+      color: var(--on-error-container);
+      border-color: var(--error);
+    }
+
+    /* Analytics layout */
+    .analytics-split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .chart-box {
+      width: 100%;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    /* Classes & Roster Two-Column Workbench */
+    .classes-workbench {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .sections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(125px, 100%), 1fr));
+      gap: var(--space-sm);
+    }
+
+    .section-tile {
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      border-top: 3px solid var(--outline);
+      border-radius: var(--rounded);
+      padding: var(--space-sm) var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      transition: border-color var(--dur-micro) var(--ease-in-out), background-color var(--dur-micro) var(--ease-in-out);
+    }
+
+    .section-tile.active {
+      background: var(--primary-container);
+      border-color: var(--primary);
+      border-top-color: var(--primary);
+    }
+
+    .section-tile-select {
+      border: none;
+      background: transparent;
+      padding: 0;
+      text-align: right;
+      cursor: pointer;
+      color: var(--on-surface);
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .section-tile-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--primary);
+    }
+
+    .section-tile-meta {
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+    }
+
+    .section-tile-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: var(--space-xs);
+      border-top: var(--hairline);
+    }
+
+    /* Schedule Grid */
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+      gap: var(--space-sm);
+    }
+
+    .schedule-item {
+      background: var(--surface-container);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-sm) var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .schedule-times {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+    }
+
+    /* Teacher 9:16 Student Card Workspace */
+    .teacher-card-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-sm) 0;
+    }
+
+    .student-card-9-16 {
+      aspect-ratio: 9 / 16;
+      height: clamp(460px, 64vh, 560px);
+      width: auto;
+      max-width: 100%;
+      background: var(--surface-container-low);
+      border: 2px solid var(--outline);
+      border-top: 5px solid var(--primary);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--card-elevated);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      text-align: center;
+    }
+
+    .student-card-top {
+      border-bottom: var(--hairline);
+      padding-bottom: var(--space-xs);
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .student-card-serial {
+      font-size: var(--label-size);
+      font-weight: 700;
+      color: var(--tertiary);
+    }
+
+    .student-card-name {
+      margin: 0;
+      font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem);
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.3;
+    }
+
+    .student-card-class {
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+      font-weight: 600;
+    }
+
+    .student-avatar-frame {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, var(--avatar-bg-top), var(--avatar-bg-bottom));
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-xs);
+      overflow: hidden;
+    }
+
+    .student-avatar-frame svg {
+      width: 100%;
+      height: 100%;
+      max-height: 220px;
+    }
+
+    .student-card-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+    }
+
+    .student-card-actions .btn {
+      min-height: 48px;
+      font-size: 1rem;
+    }
+
+    .card-nav-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-md);
+    }
+
+    .student-dots-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem;
+      max-width: 680px;
+    }
+
+    .student-dot-btn {
+      min-width: 34px;
+      min-height: 34px;
+      padding: 0 0.4rem;
+      border-radius: var(--rounded);
+      border: 1px solid var(--outline-variant);
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      font-size: var(--label-size);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .student-dot-btn.current {
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-container);
+    }
+
+    .student-dot-btn.present {
+      background: var(--secondary-container);
+      color: var(--on-secondary-container);
+      border-color: var(--secondary);
+    }
+
+    .student-dot-btn.absent {
+      background: var(--error-container);
+      color: var(--on-error-container);
+      border-color: var(--error);
+    }
+
+    /* Official Print Area Header/Footer */
+    .print-only-header, .print-only-footer {
+      display: none;
+    }
+
+    .report-approval-preview {
+      margin-top: var(--space-lg);
+      padding-top: var(--space-md);
+      border-top: var(--brass-rule);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .director-sign-box {
+      min-width: 240px;
+      text-align: center;
+      padding: var(--space-sm) var(--space-lg);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      background: var(--surface-container);
+    }
+
+    .director-sign-title {
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 1.75rem;
+    }
+
+    .director-sign-line {
+      border-top: 1px dashed var(--on-surface-variant);
+      padding-top: 0.25rem;
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+    }
+
+    .hidden { display: none !important; }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .analytics-split,
+      .classes-workbench {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-grid {
+        grid-template-columns: 1fr;
+        padding: var(--space-sm);
+      }
+      .app-header {
+        padding: var(--space-sm) var(--space-md);
+      }
+      .student-card-9-16 {
+        height: auto;
+        min-height: 460px;
+        width: 100%;
+        max-width: 320px;
+      }
+      .role-option-btn {
+        font-size: 0.82rem;
+        padding: 0.45rem 0.35rem;
+      }
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Print A4 Styling */
+    @page {
+      size: A4 portrait;
+      margin: 10mm 12mm;
+    }
+
+    @media print {
+      html, body {
+        background: var(--surface-container-low);
+        color: var(--on-surface);
+        font-family: var(--font-print);
+        font-size: 13pt;
+      }
+
+      .no-print,
+      .app-header,
+      #auth-view,
+      #force-pw-view,
+      #teacher-view,
+      #supervisor-nav-area,
+      #tab-monitoring-view,
+      #tab-system-view,
+      #report-controls-bar,
+      .report-approval-preview {
+        display: none !important;
+      }
+
+      .page-grid {
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+        display: block;
+      }
+
+      .charter-panel {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        background: transparent;
+      }
+
+      .print-only-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid var(--on-surface);
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+        font-family: var(--font-print);
+      }
+
+      .print-header-col {
+        font-size: 12pt;
+        line-height: 1.45;
+      }
+
+      .print-header-center {
+        text-align: center;
+        font-weight: 700;
+        font-size: 15pt;
+      }
+
+      .table-scroll {
+        overflow: visible;
+        border: none;
+      }
+
+      .report-table {
+        width: 100%;
+        font-family: var(--font-print);
+        font-size: 11.5pt;
+      }
+
+      .report-table th, .report-table td {
+        border: 1px solid var(--on-surface);
+        padding: 4px 5px;
+      }
+
+      .report-table th.col-serial, .report-table td.col-serial {
+        width: 28px;
+        min-width: 28px;
+      }
+
+      .report-table th.col-student, .report-table td.col-student {
+        min-width: 145px;
+      }
+
+      .report-table th.col-period, .report-table td.col-period {
+        width: 26px;
+        min-width: 26px;
+      }
+
+      .report-table th.col-total, .report-table td.col-total {
+        width: 78px;
+        min-width: 78px;
+        white-space: nowrap;
+      }
+
+      .cell-mark-btn {
+        border: none;
+        background: transparent;
+        width: auto;
+        height: auto;
+        font-family: var(--font-print);
+      }
+
+      .print-only-footer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 22px;
+        padding-top: 10px;
+        font-family: var(--font-print);
+      }
+
+      .print-director-only {
+        text-align: center;
+        min-width: 220px;
+      }
+
+      .print-director-only .sign-title {
+        font-weight: 700;
+        font-size: 13pt;
+        margin-bottom: 32px;
+      }
+
+      .print-director-only .sign-line {
+        border-top: 1px solid var(--on-surface);
+        padding-top: 4px;
+        font-size: 11pt;
+      }
+    }
+  
+    :root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+    html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Header Bar (Always Visible to All Users) -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-block">
+        <div class="brand-crest" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <h1>مدرسة صلالة للتعليم (١٠–١٢) بنين</h1>
+          <p class="brand-subtitle">النظام الإلكتروني لإدارة الغياب اليومي للحصص الدراسية</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Numeral Format Switcher -->
+        <div class="numeral-toggle" role="group" aria-label="تنسيق الأرقام">
+          <span class="numeral-toggle-label">الأرقام:</span>
+          <button type="button" id="btn-num-hindi" class="numeral-btn" aria-pressed="true" onclick="setNumeralMode('hindi')">الهندية (١٢٣)</button>
+          <button type="button" id="btn-num-western" class="numeral-btn" aria-pressed="false" onclick="setNumeralMode('western')">العربية (123)</button>
+        </div>
+
+        <span id="save-status-pill" class="save-status-pill hidden" aria-live="polite">تم حفظ التعديلات</span>
+
+        <div id="header-user-box" class="user-chip hidden">
+          <span id="header-user-name"></span>
+          <span id="header-user-role" class="badge badge-gold"></span>
+        </div>
+
+        <span id="sync-status" class="badge badge-gold">المزامنة: غير مفعلة</span>
+          <button type="button" id="btn-sync" class="btn btn-ghost-light hidden" onclick="openSyncSettings()">المزامنة</button>
+          <button type="button" id="btn-backup" class="btn btn-ghost-light hidden" onclick="backupNow(true)">نسخة احتياطية</button>
+          <button type="button" id="btn-restore" class="btn btn-ghost-light hidden" onclick="document.getElementById('restore-file-input').click()">استعادة</button>
+          <input type="file" id="restore-file-input" accept=".json" class="hidden" onchange="restoreBackup(this)">
+          <button type="button" id="btn-logout" class="btn btn-ghost-light hidden" onclick="logoutUser()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span>تسجيل الخروج</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-grid">
+
+    <!-- 1. Mandatory Login Screen (No Demo Login Button) -->
+    <section id="auth-view" class="auth-shell">
+      <div class="auth-card">
+        <div class="auth-banner">
+          <h2>تسجيل الدخول إلى النظام</h2>
+          <p>يُرجى اختيار الصفة وإدخال بيانات الدخول المعتمدة</p>
+        </div>
+        <form id="login-form" class="auth-body" onsubmit="handleLoginSubmit(event)">
+          <div class="field-group">
+            <span class="field-label">صفة المستخدم</span>
+            <div class="role-selector" role="group" aria-label="اختيار صفة المستخدم">
+              <button type="button" id="role-btn-supervisor" class="role-option-btn" aria-pressed="true" onclick="selectLoginRole('supervisor')">المشرف / مدير المدرسة</button>
+              <button type="button" id="role-btn-teacher" class="role-option-btn" aria-pressed="false" onclick="selectLoginRole('teacher')">معلم</button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="login-username" class="field-label">اسم المستخدم</label>
+            <input type="text" id="login-username" class="input-control" dir="ltr" autocomplete="username" required>
+          </div>
+
+          <div class="field-group">
+            <label for="login-password" class="field-label">كلمة المرور</label>
+            <div class="password-wrap">
+              <input type="password" id="login-password" class="input-control" dir="ltr" autocomplete="current-password" required>
+              <button type="button" class="password-eye-btn" aria-label="إظهار أو إخفاء كلمة المرور" onclick="togglePasswordVisibility('login-password')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div id="login-error" class="inline-alert error hidden" role="alert"></div>
+
+          <button type="submit" class="btn btn-primary">دخول إلى النظام</button>
+
+          <div class="credential-note hidden" id="login-hint-box"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 2. Mandatory First-Login Password Change View -->
+    <section id="force-pw-view" class="auth-shell hidden">
+      <div class="auth-card">
+        <div class="auth-banner">
+          <h2>تغيير كلمة المرور الإجباري</h2>
+          <p id="force-pw-subtitle">يلزم تعيين كلمة مرور شخصية جديدة قبل متابعة استخدام النظام</p>
+        </div>
+        <form id="force-pw-form" class="auth-body" onsubmit="handleForcePasswordSubmit(event)">
+          <div class="inline-alert warning">
+            تم الدخول بكلمة المرور الافتراضية أو المُعاد تعيينها. لا يمكن تخطي هذه الخطوة لحماية صلاحيات الحساب.
+          </div>
+
+          <div class="field-group">
+            <label for="new-pw-input" class="field-label">كلمة المرور الجديدة (٤ أحرف فأكثر)</label>
+            <input type="password" id="new-pw-input" class="input-control" dir="ltr" required>
+          </div>
+
+          <div class="field-group">
+            <label for="confirm-pw-input" class="field-label">تأكيد كلمة المرور الجديدة</label>
+            <input type="password" id="confirm-pw-input" class="input-control" dir="ltr" required>
+          </div>
+
+          <div id="force-pw-error" class="inline-alert error hidden" role="alert"></div>
+
+          <button type="submit" class="btn btn-emerald">حفظ كلمة المرور والدخول</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 3. Supervisor / Principal Dashboard View -->
+    <section id="supervisor-view" class="hidden">
+
+      <!-- Main 2-Tab Navigation + Sub-Tab Navigation -->
+      <div id="supervisor-nav-area" class="charter-panel no-print" style="margin-bottom: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-md);">
+        <div class="main-tabs-bar" role="tablist" aria-label="الأقسام الرئيسية للوحة المشرف">
+          <button type="button" id="main-tab-monitoring" class="main-tab-btn" role="tab" aria-selected="true" onclick="switchSupervisorMainTab('monitoring')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>
+            </svg>
+            <span>متابعة النظام</span>
+          </button>
+          <button type="button" id="main-tab-system" class="main-tab-btn" role="tab" aria-selected="false" onclick="switchSupervisorMainTab('system')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <span>إدارة النظام</span>
+          </button>
+        </div>
+
+        <!-- Sub-tabs for متابعة النظام -->
+        <div id="subtabs-monitoring" class="sub-tabs-bar" role="tablist" aria-label="تبويبات متابعة النظام">
+          <button type="button" id="subtab-analytics" class="sub-tab-btn" role="tab" aria-selected="true" onclick="switchSupervisorSubTab('analytics')">المتابعة والتحليلات</button>
+          <button type="button" id="subtab-reports" class="sub-tab-btn" role="tab" aria-selected="false" onclick="switchSupervisorSubTab('reports')">التقارير والاعتمادات</button>
+        </div>
+
+        <!-- Sub-tabs for إدارة النظام -->
+        <div id="subtabs-system" class="sub-tabs-bar hidden" role="tablist" aria-label="تبويبات إدارة النظام">
+          <button type="button" id="subtab-classes" class="sub-tab-btn" role="tab" aria-selected="true" onclick="switchSupervisorSubTab('classes')">تهيئة الفصول والجدول الزمني</button>
+          <button type="button" id="subtab-teachers" class="sub-tab-btn" role="tab" aria-selected="false" onclick="switchSupervisorSubTab('teachers')">إدارة المعلمين والصلاحيات</button>
+        </div>
+      </div>
+
+      <!-- TAB 1A: المتابعة والتحليلات -->
+      <div id="tab-monitoring-view">
+        <div class="charter-panel" style="margin-bottom: var(--space-lg);">
+          <div class="section-head">
+            <h2>لوحة المتابعة اليومية والتحليلات</h2>
+            <div id="sup-live-clock-badge" class="badge badge-navy"></div>
+          </div>
+
+          <div class="form-row-aligned" style="margin-bottom: var(--space-lg);">
+            <div class="field-group" style="min-width: 190px;">
+              <label for="mon-date-input" class="field-label">تاريخ المتابعة</label>
+              <input type="date" id="mon-date-input" class="input-control" onchange="renderMonitoringTab()">
+            </div>
+            <div class="field-group" style="min-width: 180px;">
+              <label for="mon-grade-filter" class="field-label">تصفية حسب الصف</label>
+              <select id="mon-grade-filter" class="select-control" onchange="renderMonitoringTab()">
+                <option value="all">جميع الصفوف</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- KPI Cards -->
+          <div id="mon-kpi-grid" class="kpi-grid" style="margin-bottom: var(--space-lg);"></div>
+
+          <!-- Analytics Chart + Frequent Absentees -->
+          <div class="analytics-split" style="margin-bottom: var(--space-lg);">
+            <div class="charter-panel" style="padding: var(--space-md);">
+              <div class="section-head">
+                <h3>توزيع الحضور والغياب عبر الحصص (١ – ٨)</h3>
+              </div>
+              <div id="mon-chart-container" class="chart-box"></div>
+            </div>
+
+            <div class="charter-panel" style="padding: var(--space-md);">
+              <div class="section-head">
+                <h3>تنبيهات الغياب المتكرر اليوم</h3>
+              </div>
+              <div id="mon-alerts-list"></div>
+            </div>
+          </div>
+
+          <!-- Period Monitoring Matrix -->
+          <div class="section-head">
+            <h3>مصفوفة رصد الحصص حسب الصف والشعبة</h3>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>الصف والشعبة</th>
+                  <th>الطلاب</th>
+                  <th style="text-align:center;">ح١</th>
+                  <th style="text-align:center;">ح٢</th>
+                  <th style="text-align:center;">ح٣</th>
+                  <th style="text-align:center;">ح٤</th>
+                  <th style="text-align:center;">ح٥</th>
+                  <th style="text-align:center;">ح٦</th>
+                  <th style="text-align:center;">ح٧</th>
+                  <th style="text-align:center;">ح٨</th>
+                  <th>إجراء</th>
+                </tr>
+              </thead>
+              <tbody id="mon-matrix-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1B: التقارير والاعتمادات -->
+      <div id="tab-reports-view" class="hidden">
+        <div class="charter-panel" id="printable-report-area">
+          <div id="report-controls-bar" class="no-print" style="margin-bottom: var(--space-lg);">
+            <div class="section-head">
+              <h2>التقارير المجمعة واعتماد مدير المدرسة</h2>
+              <span id="report-approval-badge" class="badge badge-gold">قيد المراجعة</span>
+            </div>
+
+            <div class="form-row-aligned">
+              <div class="field-group" style="min-width: 170px;">
+                <label for="rep-date-input" class="field-label">التاريخ</label>
+                <input type="date" id="rep-date-input" class="input-control" onchange="renderReportsTab()">
+              </div>
+              <div class="field-group" style="min-width: 210px;">
+                <label for="rep-section-select" class="field-label">الصف والشعبة</label>
+                <select id="rep-section-select" class="select-control" onchange="renderReportsTab()"></select>
+              </div>
+              <button type="button" id="btn-approve-report" class="btn btn-emerald" onclick="toggleReportApproval()">اعتماد الكشف</button>
+              <button type="button" class="btn btn-secondary" onclick="exportReportCSV()">تصدير CSV</button>
+              <button type="button" class="btn btn-primary" onclick="printA4Report()">طباعة الكشف (A4)</button>
+            </div>
+            <p class="field-label" style="margin-top: var(--space-sm); margin-bottom: 0;">يمكن للمشرف الضغط على خانة أي حصة لتعديل حالة الطالب مباشرة قبل الاعتماد النهائي.</p>
+          </div>
+
+          <!-- Official A4 Print Header -->
+          <div class="print-only-header">
+            <div class="print-header-col">
+              <div>سلطنة عُمان</div>
+              <div>وزارة التربية والتعليم</div>
+              <div>مدرسة صلالة للتعليم (١٠–١٢) بنين</div>
+            </div>
+            <div class="print-header-col print-header-center">
+              <div>كشف الحضور والغياب اليومي المجمع</div>
+              <div style="font-size: 12pt; font-weight: 400;">الحصص الدراسية (١ – ٨)</div>
+            </div>
+            <div class="print-header-col" id="print-meta-col"></div>
+          </div>
+
+          <div class="table-scroll">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th class="col-serial">م</th>
+                  <th class="col-student">اسم الطالب</th>
+                  <th class="col-period" id="th-p-1">ح١</th>
+                  <th class="col-period" id="th-p-2">ح٢</th>
+                  <th class="col-period" id="th-p-3">ح٣</th>
+                  <th class="col-period" id="th-p-4">ح٤</th>
+                  <th class="col-period" id="th-p-5">ح٥</th>
+                  <th class="col-period" id="th-p-6">ح٦</th>
+                  <th class="col-period" id="th-p-7">ح٧</th>
+                  <th class="col-period" id="th-p-8">ح٨</th>
+                  <th class="col-total">إجمالي الحضور</th>
+                  <th class="col-total">إجمالي الغياب</th>
+                </tr>
+              </thead>
+              <tbody id="report-table-body"></tbody>
+            </table>
+          </div>
+
+          <!-- Screen Preview of Sole Principal Approval -->
+          <div class="report-approval-preview no-print">
+            <div class="director-sign-box">
+              <div class="director-sign-title">اعتماد مدير المدرسة</div>
+              <div class="director-sign-line" id="screen-approval-stamp">التوقيع والختم المدرسي</div>
+            </div>
+          </div>
+
+          <!-- Print-only Footer: Strictly Principal Approval Only -->
+          <div class="print-only-footer">
+            <div class="print-director-only">
+              <div class="sign-title">اعتماد مدير المدرسة</div>
+              <div class="sign-line">التوقيع / الختم</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2A: تهيئة الفصول والجدول الزمني -->
+      <div id="tab-system-view" class="hidden">
+        <div id="subview-classes">
+          <div class="charter-panel" style="margin-bottom: var(--space-lg);">
+            <div class="section-head">
+              <h2>إدارة الصفوف والشعب وقوائم الطلاب</h2>
+              <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
+                <button type="button" id="btn-reset-all-classes" class="btn btn-ruby btn-sm" onclick="handleResetAllClasses(this)">تصفير وتفريغ الصفوف والقوائم</button>
+                <button type="button" class="btn btn-gold-outline btn-sm" onclick="restoreSampleClasses()">تعبئة بيانات نموذجية</button>
+              </div>
+            </div>
+
+            <div id="classes-feedback" class="inline-alert success hidden" style="margin-bottom: var(--space-md);"></div>
+
+            <!-- Add Class/Section Form -->
+            <form class="form-row-aligned" style="margin-bottom: var(--space-lg); padding: var(--space-md); background: var(--surface-container); border-radius: var(--rounded); border: var(--hairline);" onsubmit="handleAddSectionSubmit(event)">
+              <div class="field-group" style="min-width:150px;">
+                <label for="new-grade-input" class="field-label">الصف الدراسي</label>
+                <select id="new-grade-input" class="select-control"><option value="9">التاسع</option><option value="10" selected>العاشر</option><option value="11">الحادي عشر</option><option value="12">الثاني عشر</option></select>
+              </div>
+              <div class="field-group">
+                <label for="new-grade-extra" class="field-label">صف جديد للقائمة</label>
+                <div style="display:flex;gap:.25rem"><input type="number" id="new-grade-extra" class="input-control" min="1" max="13" style="width:5rem" placeholder="رقم"><button type="button" class="btn btn-gold-outline btn-sm" onclick="addGradeOption()">إضافة صف</button></div>
+              </div>
+              <div class="field-group">
+                <label for="new-section-count" class="field-label">عدد الشعب</label>
+                <div style="display:flex;gap:.25rem"><button type="button" class="btn btn-secondary btn-sm" onclick="stepSecCount(-1)">−</button><input type="number" id="new-section-count" class="input-control" min="1" max="30" value="10" style="width:5rem;text-align:center"><button type="button" class="btn btn-secondary btn-sm" onclick="stepSecCount(1)">+</button></div>
+              </div>
+              <button type="submit" class="btn btn-primary">إنشاء الشعب</button>
+              <div class="field-group" style="min-width: 160px; margin-right: auto;">
+                <label for="delete-grade-select" class="field-label">حذف صف كامل</label>
+                <select id="delete-grade-select" class="select-control"></select>
+              </div>
+              <button type="button" id="btn-delete-whole-grade" class="btn btn-ruby" onclick="handleDeleteWholeGrade(this)">حذف الصف</button>
+            </form>
+
+            <!-- Dynamic Workbench: Left = Sorted Sections Grid, Right = Active Section Roster & Import -->
+            <div class="classes-workbench">
+              <div>
+                <h3 style="margin: 0 0 var(--space-sm); color: var(--primary);">الصفوف والشعب (مرتبة تصاعدياً)</h3>
+                <div id="sections-grid-container" class="sections-grid"></div>
+              </div>
+
+              <div class="charter-panel" style="padding: var(--space-md); background: var(--background);">
+                <div class="section-head">
+                  <h3 id="roster-panel-title">قائمة الطلاب للشعبة المحددة</h3>
+                  <span id="roster-count-badge" class="badge badge-navy"></span>
+                </div>
+
+                <div id="roster-panel-body"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bell Schedule Configuration -->
+          <div class="charter-panel">
+            <div class="section-head">
+              <h2>تهيئة الجدول الزمني للحصص الدراسية (١ – ٨)</h2>
+              <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
+                <button type="button" class="btn btn-gold-outline btn-sm" onclick="restoreDefaultBellSchedule()">استعادة التوقيت المدرسي الرسمي</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveBellSchedule()">حفظ الجدول الزمني</button>
+              </div>
+            </div>
+            <div id="schedule-feedback" class="inline-alert success hidden" style="margin-bottom: var(--space-md);"></div>
+            <div id="bell-schedule-grid" class="schedule-grid"></div>
+          </div>
+        </div>
+
+        <!-- TAB 2B: إدارة المعلمين والصلاحيات -->
+        <div id="subview-teachers" class="hidden">
+          <div class="charter-panel">
+            <div class="section-head">
+              <h2>إدارة حسابات المعلمين والصلاحيات</h2>
+            </div>
+
+            <div id="teachers-feedback" class="inline-alert success hidden" style="margin-bottom: var(--space-md);"></div>
+
+            <div class="charter-panel" style="margin-bottom:var(--space-md);padding:var(--space-md);background:var(--surface-container);">
+              <h3 style="margin:0 0 var(--space-sm);color:var(--primary);">التخصصات</h3>
+              <div id="subjects-chips" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.6rem;"></div>
+              <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem;"><input type="text" id="new-subject-input" class="input-control" placeholder="تخصص جديد" style="max-width:240px"><button type="button" class="btn btn-primary btn-sm" onclick="addSubject()">إضافة تخصص</button></div>
+              <h3 style="margin:0 0 var(--space-sm);color:var(--primary);">استيراد المعلمين من Excel</h3>
+              <p class="field-label" style="margin:0 0 .4rem;">أعمدة الملف بالترتيب: <b>المسلسل | الاسم | التخصص</b>. بعد الاستيراد حدّد لكل معلم اسم الدخول وكلمة المرور والشعب من زر «تعديل».</p>
+              <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.8rem;"><input type="file" id="teachers-xlsx-input" accept=".xlsx,.xls" class="input-control" style="max-width:280px"><button type="button" class="btn btn-primary btn-sm" onclick="importTeachersXlsx()">استيراد</button><button type="button" class="btn btn-gold-outline btn-sm" onclick="downloadTeachersTemplate()">تنزيل نموذج</button></div>
+              <h3 style="margin:0 0 var(--space-sm);color:var(--primary);">تقرير المعلمين</h3>
+              <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;"><select id="report-subject-select" class="select-control" style="max-width:240px"></select><button type="button" class="btn btn-secondary btn-sm" onclick="showTeacherReport()">عرض</button><button type="button" class="btn btn-gold-outline btn-sm" onclick="exportTeacherReport()">تصدير CSV</button></div>
+              <div id="teacher-report-box" class="table-scroll" style="margin-top:.6rem;"></div>
+            </div>
+            <form id="add-teacher-form" class="charter-panel" style="margin-bottom: var(--space-lg); padding: var(--space-md); background: var(--surface-container);" onsubmit="handleAddTeacherSubmit(event)">
+              <h3 style="margin: 0 0 var(--space-sm); color: var(--primary);">إضافة معلم جديد (كلمة المرور الافتراضية: <bdi dir="ltr">12345</bdi>)</h3>
+              <div class="form-row-aligned" style="margin-bottom: var(--space-sm);">
+                <div class="field-group" style="flex: 1; min-width: 180px;">
+                  <label for="teacher-fullname-input" class="field-label">الاسم الكامل للمعلم</label>
+                  <input type="text" id="teacher-fullname-input" class="input-control" required>
+                </div>
+                <div class="field-group" style="flex: 1; min-width: 170px;">
+                  <label for="teacher-username-input" class="field-label">اسم الدخول (بالإنجليزية)</label>
+                  <input type="text" id="teacher-username-input" class="input-control" dir="ltr" required>
+                </div>
+                <div class="field-group" style="flex: 1; min-width: 160px;">
+                  <label for="teacher-password-input" class="field-label">كلمة المرور (فارغة = 12345)</label>
+                  <input type="text" id="teacher-password-input" class="input-control" dir="ltr" autocomplete="off">
+                </div>
+                <div class="field-group" style="flex: 1; min-width: 160px;">
+                  <label for="teacher-subject-input" class="field-label">المادة الدراسية</label>
+                  <select id="teacher-subject-input" class="select-control" required></select>
+                </div>
+              </div>
+              <div class="field-group" style="margin-bottom: var(--space-md);">
+                <span class="field-label">الشعب الدراسية المسندة للمعلم</span>
+                <div id="new-teacher-sections-checks" style="display:flex; flex-wrap:wrap; gap:var(--space-sm);"></div>
+              </div>
+              <button type="submit" id="teacher-submit-btn" class="btn btn-primary">إضافة المعلم وتفعيل التغيير الإجباري عند الدخول</button>
+            </form>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>اسم الدخول</th>
+                    <th>المادة</th>
+                    <th>الشعب المسندة</th>
+                    <th>حالة كلمة المرور</th>
+                    <th>إعادة تعيين كلمة المرور</th>
+                    <th>إدارة</th>
+                  </tr>
+                </thead>
+                <tbody id="teachers-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Teacher Attendance Workspace -->
+    <section id="teacher-view" class="hidden">
+      <div class="charter-panel" style="margin-bottom: var(--space-lg);">
+        <div class="section-head">
+          <div>
+            <h2>مساحة رصد الحضور والغياب للمعلم</h2>
+            <p class="field-label" style="margin: 0.2rem 0 0;">الرصد متاح للحصة الجارية فقط حسب التوقيت الفعلي للنظام</p>
+          </div>
+          <div id="teacher-period-status-badge" class="badge badge-gold"></div>
+        </div>
+
+        <div id="teacher-freeze-banner" class="inline-alert warning hidden" style="margin-bottom: var(--space-md);"></div>
+
+        <div class="form-row-aligned" style="margin-bottom: var(--space-md);">
+          <div class="field-group" style="min-width: 220px;">
+            <label for="teacher-section-select" class="field-label">اختر الصف والشعبة</label>
+            <select id="teacher-section-select" class="select-control" onchange="onTeacherSectionChange()"></select>
+          </div>
+          <div class="field-group">
+            <span class="field-label">نمط العرض</span>
+            <div class="role-selector" style="min-width: 260px;">
+              <button type="button" id="view-btn-card" class="role-option-btn" aria-pressed="true" onclick="setTeacherViewMode('card')">بطاقة الطالب (٩:١٦)</button>
+              <button type="button" id="view-btn-table" class="role-option-btn" aria-pressed="false" onclick="setTeacherViewMode('table')">العرض الجدولي</button>
+            </div>
+          </div>
+          <button type="button" id="btn-mark-all-present" class="btn btn-emerald" onclick="markRemainingPresent()">تحضير المتبقين في الحصة</button>
+        </div>
+
+        <!-- Teacher Live Stats -->
+        <div id="teacher-kpi-grid" class="kpi-grid" style="margin-bottom: var(--space-lg);"></div>
+
+        <!-- 9:16 Card Mode -->
+        <div id="teacher-card-mode-area" class="teacher-card-stage"></div>
+
+        <!-- Compact Table Mode -->
+        <div id="teacher-table-mode-area" class="hidden">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 60px; text-align:center;">التسلسل</th>
+                  <th>اسم الطالب</th>
+                  <th style="width: 140px; text-align:center;">الحالة</th>
+                  <th style="width: 220px; text-align:center;">رصد الحصة الحالية</th>
+                </tr>
+              </thead>
+              <tbody id="teacher-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <api-shim></api-shim>
+
+  <script>
+    // Published-page storage layer: replaces the host's notebookAppApi with per-browser storage.
+    (function () {
+      var KEY = 'salalah-absence-app-state-v6';
+      if (!window.notebookAppApi) window.notebookAppApi = {};
+      var api = window.notebookAppApi;
+      // ---- Storage layer: pluggable providers. Today: 'local' (this device).
+      // To upgrade later (cloud/database), register a provider with async load() and save(state), then call AppStorage.use(name).
+      var AppStorage = window.AppStorage = {
+        providers: {}, current: 'local',
+        register: function (name, p) { this.providers[name] = p; },
+        use: function (name) { if (this.providers[name]) this.current = name; },
+        provider: function () { return this.providers[this.current]; }
+      };
+      AppStorage.register('local', {
+        load: async function () { try { var v = localStorage.getItem(KEY); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+        save: async function (state) { localStorage.setItem(KEY, JSON.stringify(state)); }
+      });
+      api.getAppState = function () { return AppStorage.provider().load(); };
+      api.setAppState = function (s) { return AppStorage.provider().save(s); };
+      if (typeof api.triggerFileDownload !== 'function') {
+        api.triggerFileDownload = async function (o) {
+          try {
+            var dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null;
+            if (dl) await dl.save({ filename: o.filename, data: o.content });
+            else if (typeof saveFileSmart === 'function') await saveFileSmart(o.filename, o.content, o.contentType);
+          } catch (e) { if (!e || e.code !== 'declined') alert('تعذر حفظ الملف.'); }
+        };
+      }
+    })();
+  </script>
+  <script>
+    // =========================================================================
+    // Default Application Seed Data (Clean, Realistic Omani 10-12 School Data)
+    // =========================================================================
+    const DEFAULT_SCHEDULE = [
+      { period: 1, label: `الحصة الأولى`, start: `07:15`, end: `07:55` },
+      { period: 2, label: `الحصة الثانية`, start: `08:00`, end: `08:40` },
+      { period: 3, label: `الحصة الثالثة`, start: `08:45`, end: `09:25` },
+      { period: 4, label: `الحصة الرابعة`, start: `09:45`, end: `10:25` },
+      { period: 5, label: `الحصة الخامسة`, start: `10:30`, end: `11:10` },
+      { period: 6, label: `الحصة السادسة`, start: `11:15`, end: `11:55` },
+      { period: 7, label: `الحصة السابعة`, start: `12:00`, end: `12:40` },
+      { period: 8, label: `الحصة الثامنة`, start: `12:45`, end: `13:25` }
+    ];
+
+    function getDefaultSeedState() {
+      const todayStr = getTodayDateISO();
+      const defaultSections = [
+        { id: `10-1`, grade: 10, section: `1` },
+        { id: `10-2`, grade: 10, section: `2` },
+        { id: `11-1`, grade: 11, section: `1` },
+        { id: `12-1`, grade: 12, section: `1` }
+      ];
+
+      const rawNames10_1 = [
+        `أحمد بن سالم الشنفري`,
+        `بدر بن علي الرواس`,
+        `تركي بن محمد الكثيري`,
+        `حسين بن سعيد المسهلي`,
+        `خالد بن عمر المعشني`,
+        `سالم بن عبدالله بيت سليم`,
+        `طارق بن ناصر باعمر`,
+        `عبدالله بن أحمد الحكماني`,
+        `عمر بن سعيد المهري`,
+        `فيصل بن عامر تبوك`,
+        `محمد بن يوسف اليافعي`,
+        `ياسر بن حمد جعبوب`
+      ];
+
+      const rawNames10_2 = [
+        `إبراهيم بن خميس العمري`,
+        `جابر بن محمد المشيخي`,
+        `حمد بن سالم الحضري`,
+        `راشد بن علي قطن`,
+        `زياد بن بدر العوائد`,
+        `سعيد بن مسلم كشوب`,
+        `عبدالرحمن بن خالد باعلوي`,
+        `عمار بن صالح الحريزي`,
+        `ماجد بن ناصر فاضل`,
+        `وليد بن سعيد البرعمي`
+      ];
+
+      const rawNames11_1 = [
+        `أسامة بن محمد باحجاج`,
+        `بلال بن سالم غواص`,
+        `تميم بن علي عكعاك`,
+        `سيف بن عبدالله المحروقي`,
+        `عادل بن أحمد المرهون`,
+        `فهد بن خالد البوسعيدي`,
+        `مازن بن حمد الشحري`,
+        `هيثم بن يوسف العجيلي`
+      ];
+
+      const rawNames12_1 = [
+        `أنس بن سعيد الزوامري`,
+        `حسن بن علي الكاف`,
+        `سلطان بن محمد صواخرون`,
+        `عبدالعزيز بن سالم باقوير`,
+        `عيسى بن عبدالله الرزيقي`,
+        `منذر بن ناصر الهلالي`,
+        `نايف بن خالد العامري`,
+        `يوسف بن أحمد مقيبل`
+      ];
+
+      const studentsBySection = {
+        '10-1': buildSortedStudents(`10-1`, rawNames10_1),
+        '10-2': buildSortedStudents(`10-2`, rawNames10_2),
+        '11-1': buildSortedStudents(`11-1`, rawNames11_1),
+        '12-1': buildSortedStudents(`12-1`, rawNames12_1)
+      };
+
+      // Seed initial morning attendance sample for today so supervisor analytics/reports are meaningful immediately
+      const sampleAtt = {};
+      sampleAtt[todayStr] = {
+        '10-1': {
+          1: buildSamplePeriodMap(studentsBySection['10-1'], [2, 8]),
+          2: buildSamplePeriodMap(studentsBySection['10-1'], [2])
+        },
+        '10-2': {
+          1: buildSamplePeriodMap(studentsBySection['10-2'], [4])
+        }
+      };
+
+      return {
+        version: 2,
+        numeralMode: `hindi`,
+        supervisor: {
+          username: `admin`,
+          password: `admin`,
+          fullName: `المشرف / مدير المدرسة`,
+          mustForceChange: true
+        },
+        teachers: [
+          {
+            id: `t-1`,
+            username: `nabil anwer`,
+            password: `12345`,
+            fullName: `نبيل أنور`,
+            subject: `الرياضيات`,
+            sections: [`10-1`, `10-2`, `11-1`, `12-1`],
+            mustForceChange: true,
+            active: true
+          },
+          {
+            id: `t-2`,
+            username: `salim`,
+            password: `12345`,
+            fullName: `سالم بن أحمد الحارثي`,
+            subject: `اللغة العربية`,
+            sections: [`10-1`, `11-1`],
+            mustForceChange: true,
+            active: true
+          }
+        ],
+        sections: defaultSections,
+        studentsBySection: studentsBySection,
+        schedule: JSON.parse(JSON.stringify(DEFAULT_SCHEDULE)),
+        attendance: sampleAtt,
+        approvals: {}
+      };
+    }
+
+    function buildSamplePeriodMap(list, absentSerials) {
+      const map = {};
+      list.forEach(function (st) {
+        map[st.id] = absentSerials.indexOf(st.serial) !== -1 ? `A` : `P`;
+      });
+      return map;
+    }
+
+    function buildSortedStudents(sectionId, rawNames) {
+      const cleaned = [];
+      const seen = {};
+      rawNames.forEach(function (line) {
+        const name = String(line || ``).trim().replace(/\s+/g, ` `);
+        if (name && !seen[name]) {
+          seen[name] = true;
+          cleaned.push(name);
+        }
+      });
+      cleaned.sort(function (a, b) {
+        return a.localeCompare(b, `ar`);
+      });
+      return cleaned.map(function (name, idx) {
+        return {
+          id: sectionId + `-s-` + (idx + 1),
+          serial: idx + 1,
+          name: name
+        };
+      });
+    }
+
+    function getTodayDateISO() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, `0`);
+      const day = String(d.getDate()).padStart(2, `0`);
+      return y + `-` + m + `-` + day;
+    }
+
+    // =========================================================================
+    // Global Runtime State
+    // =========================================================================
+    let appState = getDefaultSeedState();
+    let session = {
+      loggedIn: false,
+      role: null,       // 'supervisor' | 'teacher'
+      username: null,
+      teacherId: null,
+      pendingForceChange: false
+    };
+    let ui = {
+      loginRole: `supervisor`,
+      supMainTab: `monitoring`,   // 'monitoring' | 'system'
+      supMonSubTab: `analytics`,  // 'analytics' | 'reports'
+      supSysSubTab: `classes`,    // 'classes' | 'teachers'
+      selectedSectionId: `10-1`,
+      teacherSectionId: `10-1`,
+      teacherViewMode: `card`,    // 'card' | 'table'
+      teacherCardIndex: 0,
+      editingTeacherId: null
+    };
+    let clockTimerId = null;
+
+    // =========================================================================
+    // Numeral Formatter (Preserves Font Family & Size)
+    // =========================================================================
+    function fmtNum(val) {
+      const str = String(val === null || val === undefined ? `` : val);
+      if (appState.numeralMode === `western`) {
+        return str.replace(/[٠-٩]/g, function (d) {
+          return String(`٠١٢٣٤٥٦٧٨٩`.indexOf(d));
+        });
+      }
+      return str.replace(/[0-9]/g, function (d) {
+        return `٠١٢٣٤٥٦٧٨٩`[Number(d)];
+      });
+    }
+
+    function setNumeralMode(mode) {
+      appState.numeralMode = mode === `western` ? `western` : `hindi`;
+      const btnH = document.getElementById(`btn-num-hindi`);
+      const btnW = document.getElementById(`btn-num-western`);
+      if (btnH) btnH.setAttribute(`aria-pressed`, appState.numeralMode === `hindi` ? `true` : `false`);
+      if (btnW) btnW.setAttribute(`aria-pressed`, appState.numeralMode === `western` ? `true` : `false`);
+      persistAppState();
+      refreshActiveView();
+    }
+
+    // =========================================================================
+    // State Persistence (Gemini Notebook Shim API)
+    // =========================================================================
+    async function persistAppState() {
+      const pill = document.getElementById(`save-status-pill`);
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+          await window.notebookAppApi.setAppState(appState);
+        }
+        if (pill && session.loggedIn) {
+          pill.classList.remove(`hidden`);
+          pill.textContent = `تم الحفظ تلقائياً ✓`;
+        }
+      } catch (err) {
+        if (pill && session.loggedIn) {
+          pill.classList.remove(`hidden`);
+          pill.textContent = `تعذر الحفظ`;
+        }
+      }
+    }
+
+    async function initializeApp() {
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && typeof saved === `object` && saved.supervisor) {
+            appState = mergeSavedState(saved);
+          }
+        }
+      } catch (e) {
+        appState = getDefaultSeedState();
+      }
+
+      if (!Array.isArray(appState.subjects)) appState.subjects = DEFAULT_SUBJECTS.slice();
+      sortSectionsAscending();
+
+      const btnH = document.getElementById(`btn-num-hindi`);
+      const btnW = document.getElementById(`btn-num-western`);
+      if (btnH) btnH.setAttribute(`aria-pressed`, appState.numeralMode === `hindi` ? `true` : `false`);
+      if (btnW) btnW.setAttribute(`aria-pressed`, appState.numeralMode === `western` ? `true` : `false`);
+
+      const todayStr = getTodayDateISO();
+      const monDate = document.getElementById(`mon-date-input`);
+      const repDate = document.getElementById(`rep-date-input`);
+      if (monDate) monDate.value = todayStr;
+      if (repDate) repDate.value = todayStr;
+
+      if (appState.sections.length > 0) {
+        ui.selectedSectionId = appState.sections[0].id;
+        ui.teacherSectionId = appState.sections[0].id;
+      } else {
+        ui.selectedSectionId = null;
+        ui.teacherSectionId = null;
+      }
+
+      if (clockTimerId) clearInterval(clockTimerId);
+      clockTimerId = setInterval(updateLivePeriodIndicators, 15000);
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    function mergeSavedState(saved) {
+      const def = getDefaultSeedState();
+      return {
+        version: saved.version || 2,
+        numeralMode: saved.numeralMode === `western` ? `western` : `hindi`,
+        supervisor: saved.supervisor || def.supervisor,
+        teachers: Array.isArray(saved.teachers) ? saved.teachers : def.teachers,
+        sections: Array.isArray(saved.sections) ? saved.sections : def.sections,
+        studentsBySection: saved.studentsBySection && typeof saved.studentsBySection === `object` ? saved.studentsBySection : {},
+        schedule: Array.isArray(saved.schedule) && saved.schedule.length === 8 ? saved.schedule : def.schedule,
+        attendance: saved.attendance && typeof saved.attendance === `object` ? saved.attendance : {},
+        approvals: saved.approvals && typeof saved.approvals === `object` ? saved.approvals : {},
+        subjects: Array.isArray(saved.subjects) ? saved.subjects : DEFAULT_SUBJECTS.slice()
+      };
+    }
+
+    // =========================================================================
+    // Authentication & Forced First-Login Password Change
+    // =========================================================================
+    function selectLoginRole(role) {
+      ui.loginRole = role === `teacher` ? `teacher` : `supervisor`;
+      const supBtn = document.getElementById(`role-btn-supervisor`);
+      const tchBtn = document.getElementById(`role-btn-teacher`);
+      if (supBtn) supBtn.setAttribute(`aria-pressed`, ui.loginRole === `supervisor` ? `true` : `false`);
+      if (tchBtn) tchBtn.setAttribute(`aria-pressed`, ui.loginRole === `teacher` ? `true` : `false`);
+      const errBox = document.getElementById(`login-error`);
+      if (errBox) errBox.classList.add(`hidden`);
+    }
+
+    function togglePasswordVisibility(inputId) {
+      const el = document.getElementById(inputId);
+      if (!el) return;
+      el.type = el.type === `password` ? `text` : `password`;
+    }
+
+    function handleLoginSubmit(event) {
+      event.preventDefault();
+      const userEl = document.getElementById(`login-username`);
+      const passEl = document.getElementById(`login-password`);
+      const errEl = document.getElementById(`login-error`);
+      if (!userEl || !passEl || !errEl) return;
+
+      const rawUser = userEl.value.trim();
+      const rawPass = passEl.value;
+      errEl.classList.add(`hidden`);
+
+      if (ui.loginRole === `supervisor`) {
+        if (rawUser === appState.supervisor.username && rawPass === appState.supervisor.password) {
+          session = {
+            loggedIn: true,
+            role: `supervisor`,
+            username: appState.supervisor.username,
+            teacherId: null,
+            pendingForceChange: Boolean(appState.supervisor.mustForceChange)
+          };
+          enterPostAuthStage();
+          return;
+        }
+        errEl.textContent = `بيانات دخول المشرف غير صحيحة. تأكد من اسم المستخدم وكلمة المرور.`;
+        errEl.classList.remove(`hidden`);
+        return;
+      }
+
+      // Teacher authentication (case-insensitive username match)
+      const teacher = appState.teachers.find(function (t) {
+        return t.username && t.username.toLowerCase() === rawUser.toLowerCase();
+      });
+
+      if (!teacher || teacher.password !== rawPass) {
+        errEl.textContent = `بيانات دخول المعلم غير صحيحة. يرجى التحقق من اسم الدخول وكلمة المرور.`;
+        errEl.classList.remove(`hidden`);
+        return;
+      }
+
+      if (!teacher.active) {
+        errEl.textContent = `هذا الحساب موقوف حالياً. يرجى مراجعة المشرف / مدير المدرسة.`;
+        errEl.classList.remove(`hidden`);
+        return;
+      }
+
+      session = {
+        loggedIn: true,
+        role: `teacher`,
+        username: teacher.username,
+        teacherId: teacher.id,
+        pendingForceChange: Boolean(teacher.mustForceChange)
+      };
+      enterPostAuthStage();
+    }
+
+    function enterPostAuthStage() {
+      const authView = document.getElementById(`auth-view`);
+      const forceView = document.getElementById(`force-pw-view`);
+      const supView = document.getElementById(`supervisor-view`);
+      const tchView = document.getElementById(`teacher-view`);
+      const userBox = document.getElementById(`header-user-box`);
+      const userNameEl = document.getElementById(`header-user-name`);
+      const userRoleEl = document.getElementById(`header-user-role`);
+      const logoutBtn = document.getElementById(`btn-logout`);
+      const savePill = document.getElementById(`save-status-pill`);
+
+      if (authView) authView.classList.add(`hidden`);
+      if (supView) supView.classList.add(`hidden`);
+      if (tchView) tchView.classList.add(`hidden`);
+      if (forceView) forceView.classList.add(`hidden`);
+
+      if (userBox) userBox.classList.remove(`hidden`);
+      if (logoutBtn) logoutBtn.classList.remove(`hidden`);
+      if (savePill) savePill.classList.remove(`hidden`);
+
+      if (session.role === `supervisor`) {
+        if (userNameEl) userNameEl.textContent = appState.supervisor.fullName;
+        if (userRoleEl) userRoleEl.textContent = `المشرف`;
+      } else {
+        const t = getCurrentTeacher();
+        if (userNameEl) userNameEl.textContent = t ? t.fullName : session.username;
+        if (userRoleEl) userRoleEl.textContent = `معلم`;
+      }
+
+      if (session.pendingForceChange) {
+        const newPw = document.getElementById(`new-pw-input`);
+        const confPw = document.getElementById(`confirm-pw-input`);
+        const errBox = document.getElementById(`force-pw-error`);
+        if (newPw) newPw.value = ``;
+        if (confPw) confPw.value = ``;
+        if (errBox) errBox.classList.add(`hidden`);
+        if (forceView) forceView.classList.remove(`hidden`);
+        return;
+      }
+
+      if (session.role === `supervisor`) {
+        if (supView) supView.classList.remove(`hidden`);
+        refreshSupervisorDashboard();
+      } else {
+        if (tchView) tchView.classList.remove(`hidden`);
+        initTeacherWorkspace();
+      }
+    }
+
+    async function handleForcePasswordSubmit(event) {
+      event.preventDefault();
+      const newEl = document.getElementById(`new-pw-input`);
+      const confEl = document.getElementById(`confirm-pw-input`);
+      const errEl = document.getElementById(`force-pw-error`);
+      if (!newEl || !confEl || !errEl) return;
+
+      const p1 = newEl.value.trim();
+      const p2 = confEl.value.trim();
+      errEl.classList.add(`hidden`);
+
+      if (p1.length < 4) {
+        errEl.textContent = `يجب أن تتكون كلمة المرور الجديدة من ٤ أحرف على الأقل.`;
+        errEl.classList.remove(`hidden`);
+        return;
+      }
+      if (p1 !== p2) {
+        errEl.textContent = `كلمتا المرور غير متطابقتين. يرجى إعادة التأكيد.`;
+        errEl.classList.remove(`hidden`);
+        return;
+      }
+
+      if (session.role === `supervisor`) {
+        if (p1 === `admin`) {
+          errEl.textContent = `لا يمكن استخدام كلمة المرور الافتراضية (admin). اختر كلمة مرور جديدة.`;
+          errEl.classList.remove(`hidden`);
+          return;
+        }
+        appState.supervisor.password = p1;
+        appState.supervisor.mustForceChange = false;
+      } else {
+        if (p1 === `12345`) {
+          errEl.textContent = `لا يمكن استخدام كلمة المرور الافتراضية (12345). اختر كلمة مرور جديدة.`;
+          errEl.classList.remove(`hidden`);
+          return;
+        }
+        const t = getCurrentTeacher();
+        if (t) {
+          t.password = p1;
+          t.mustForceChange = false;
+        }
+      }
+
+      session.pendingForceChange = false;
+      await persistAppState();
+      enterPostAuthStage();
+    }
+
+    function logoutUser() {
+      session = {
+        loggedIn: false,
+        role: null,
+        username: null,
+        teacherId: null,
+        pendingForceChange: false
+      };
+      const authView = document.getElementById(`auth-view`);
+      const forceView = document.getElementById(`force-pw-view`);
+      const supView = document.getElementById(`supervisor-view`);
+      const tchView = document.getElementById(`teacher-view`);
+      const userBox = document.getElementById(`header-user-box`);
+      const logoutBtn = document.getElementById(`btn-logout`);
+      const savePill = document.getElementById(`save-status-pill`);
+      const passEl = document.getElementById(`login-password`);
+
+      if (forceView) forceView.classList.add(`hidden`);
+      if (supView) supView.classList.add(`hidden`);
+      if (tchView) tchView.classList.add(`hidden`);
+      if (userBox) userBox.classList.add(`hidden`);
+      if (logoutBtn) logoutBtn.classList.add(`hidden`);
+      if (savePill) savePill.classList.add(`hidden`);
+      if (authView) authView.classList.remove(`hidden`);
+      if (passEl) passEl.value = ``;
+    }
+
+    function getCurrentTeacher() {
+      if (!session.teacherId) return null;
+      return appState.teachers.find(function (t) { return t.id === session.teacherId; }) || null;
+    }
+
+    function refreshActiveView() {
+      if (!session.loggedIn || session.pendingForceChange) return;
+      if (session.role === `supervisor`) {
+        refreshSupervisorDashboard();
+      } else if (session.role === `teacher`) {
+        renderTeacherWorkspace();
+      }
+    }
+
+    // =========================================================================
+    // Real-Time Period Calculator (Strict Active Window Enforcement)
+    // =========================================================================
+    function getCurrentActivePeriod() {
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      for (let i = 0; i < appState.schedule.length; i++) {
+        const item = appState.schedule[i];
+        const sParts = String(item.start).split(`:`);
+        const eParts = String(item.end).split(`:`);
+        const sMin = Number(sParts[0]) * 60 + Number(sParts[1]);
+        const eMin = Number(eParts[0]) * 60 + Number(eParts[1]);
+        if (nowMinutes >= sMin && nowMinutes <= eMin) {
+          return item;
+        }
+      }
+      return null;
+    }
+
+    function getFormattedNowTime() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, `0`);
+      const mm = String(now.getMinutes()).padStart(2, `0`);
+      return fmtNum(hh + `:` + mm);
+    }
+
+    function updateLivePeriodIndicators() {
+      if (!session.loggedIn || session.pendingForceChange) return;
+      if (session.role === `supervisor` && ui.supMainTab === `monitoring` && ui.supMonSubTab === `analytics`) {
+        renderSupervisorClockBadge();
+      } else if (session.role === `teacher`) {
+        renderTeacherWorkspace();
+      }
+    }
+
+    function renderSupervisorClockBadge() {
+      const badge = document.getElementById(`sup-live-clock-badge`);
+      if (!badge) return;
+      const active = getCurrentActivePeriod();
+      const timeStr = getFormattedNowTime();
+      if (active) {
+        badge.className = `badge badge-emerald`;
+        badge.textContent = `الساعة ` + timeStr + ` • الجارية: ` + active.label + ` (` + fmtNum(active.start) + ` – ` + fmtNum(active.end) + `)`;
+      } else {
+        badge.className = `badge badge-gold`;
+        badge.textContent = `الساعة ` + timeStr + ` • خارج وقت الحصص الدراسية`;
+      }
+    }
+
+    // =========================================================================
+    // Supervisor Navigation (2 Main Tabs -> 2 Sub-Tabs Each)
+    // =========================================================================
+    function switchSupervisorMainTab(tab) {
+      ui.supMainTab = tab === `system` ? `system` : `monitoring`;
+
+      const monBtn = document.getElementById(`main-tab-monitoring`);
+      const sysBtn = document.getElementById(`main-tab-system`);
+      const subMon = document.getElementById(`subtabs-monitoring`);
+      const subSys = document.getElementById(`subtabs-system`);
+
+      if (monBtn) monBtn.setAttribute(`aria-selected`, ui.supMainTab === `monitoring` ? `true` : `false`);
+      if (sysBtn) sysBtn.setAttribute(`aria-selected`, ui.supMainTab === `system` ? `true` : `false`);
+      if (subMon) subMon.classList.toggle(`hidden`, ui.supMainTab !== `monitoring`);
+      if (subSys) subSys.classList.toggle(`hidden`, ui.supMainTab !== `system`);
+
+      refreshSupervisorDashboard();
+    }
+
+    function switchSupervisorSubTab(subTab) {
+      if (ui.supMainTab === `monitoring`) {
+        ui.supMonSubTab = subTab === `reports` ? `reports` : `analytics`;
+      } else {
+        ui.supSysSubTab = subTab === `teachers` ? `teachers` : `classes`;
+      }
+      refreshSupervisorDashboard();
+    }
+
+    function refreshSupervisorDashboard() {
+      const monView = document.getElementById(`tab-monitoring-view`);
+      const repView = document.getElementById(`tab-reports-view`);
+      const sysView = document.getElementById(`tab-system-view`);
+      const subClasses = document.getElementById(`subview-classes`);
+      const subTeachers = document.getElementById(`subview-teachers`);
+
+      const subAnalyticBtn = document.getElementById(`subtab-analytics`);
+      const subRepBtn = document.getElementById(`subtab-reports`);
+      const subClassBtn = document.getElementById(`subtab-classes`);
+      const subTchBtn = document.getElementById(`subtab-teachers`);
+
+      if (monView) monView.classList.add(`hidden`);
+      if (repView) repView.classList.add(`hidden`);
+      if (sysView) sysView.classList.add(`hidden`);
+
+      if (ui.supMainTab === `monitoring`) {
+        if (subAnalyticBtn) subAnalyticBtn.setAttribute(`aria-selected`, ui.supMonSubTab === `analytics` ? `true` : `false`);
+        if (subRepBtn) subRepBtn.setAttribute(`aria-selected`, ui.supMonSubTab === `reports` ? `true` : `false`);
+
+        if (ui.supMonSubTab === `analytics`) {
+          if (monView) monView.classList.remove(`hidden`);
+          renderMonitoringTab();
+        } else {
+          if (repView) repView.classList.remove(`hidden`);
+          renderReportsTab();
+        }
+      } else {
+        if (sysView) sysView.classList.remove(`hidden`);
+        if (subClassBtn) subClassBtn.setAttribute(`aria-selected`, ui.supSysSubTab === `classes` ? `true` : `false`);
+        if (subTchBtn) subTchBtn.setAttribute(`aria-selected`, ui.supSysSubTab === `teachers` ? `true` : `false`);
+
+        if (subClasses) subClasses.classList.toggle(`hidden`, ui.supSysSubTab !== `classes`);
+        if (subTeachers) subTeachers.classList.toggle(`hidden`, ui.supSysSubTab !== `teachers`);
+
+        if (ui.supSysSubTab === `classes`) {
+          renderClassesManagementTab();
+        } else {
+          renderTeachersManagementTab();
+        }
+      }
+    }
+
+    // =========================================================================
+    // Helper: Section Formatting & Ascending Sort
+    // =========================================================================
+    function formatSectionName(sec) {
+      return `الصف ` + fmtNum(sec.grade) + ` / ` + fmtNum(sec.section);
+    }
+
+    function sortSectionsAscending() {
+      appState.sections.sort(function (a, b) {
+        if (Number(a.grade) !== Number(b.grade)) {
+          return Number(a.grade) - Number(b.grade);
+        }
+        const na = Number(a.section);
+        const nb = Number(b.section);
+        if (!isNaN(na) && !isNaN(nb)) {
+          return na - nb;
+        }
+        return String(a.section).localeCompare(String(b.section), `ar`);
+      });
+    }
+
+    function getStudentsForSection(sectionId) {
+      return appState.studentsBySection[sectionId] || [];
+    }
+
+    function getAttendanceMap(dateStr, sectionId, period) {
+      if (!appState.attendance[dateStr]) return {};
+      if (!appState.attendance[dateStr][sectionId]) return {};
+      return appState.attendance[dateStr][sectionId][period] || {};
+    }
+
+    function setStudentAttendanceRecord(dateStr, sectionId, period, studentId, status) {
+      if (!appState.attendance[dateStr]) appState.attendance[dateStr] = {};
+      if (!appState.attendance[dateStr][sectionId]) appState.attendance[dateStr][sectionId] = {};
+      if (!appState.attendance[dateStr][sectionId][period]) appState.attendance[dateStr][sectionId][period] = {};
+      if (status === null) {
+        delete appState.attendance[dateStr][sectionId][period][studentId];
+      } else {
+        appState.attendance[dateStr][sectionId][period][studentId] = status;
+      }
+    }
+
+    // =========================================================================
+    // TAB 1A: المتابعة والتحليلات (Monitoring & Analytics)
+    // =========================================================================
+    function renderMonitoringTab() {
+      renderSupervisorClockBadge();
+
+      const dateInput = document.getElementById(`mon-date-input`);
+      const gradeFilter = document.getElementById(`mon-grade-filter`);
+      const dateStr = dateInput && dateInput.value ? dateInput.value : getTodayDateISO();
+
+      // Populate Grade filter options cleanly
+      if (gradeFilter) {
+        const currentGradeVal = gradeFilter.value || `all`;
+        const gradesSet = {};
+        appState.sections.forEach(function (s) { gradesSet[s.grade] = true; });
+        const sortedGrades = Object.keys(gradesSet).map(Number).sort(function (a, b) { return a - b; });
+
+        gradeFilter.innerHTML = `<option value="all">جميع الصفوف</option>` + sortedGrades.map(function (g) {
+          return `<option value="` + g + `">الصف ` + fmtNum(g) + `</option>`;
+        }).join(``);
+
+        gradeFilter.value = sortedGrades.indexOf(Number(currentGradeVal)) !== -1 ? currentGradeVal : `all`;
+      }
+
+      const selectedGrade = gradeFilter ? gradeFilter.value : `all`;
+      const filteredSections = appState.sections.filter(function (s) {
+        return selectedGrade === `all` || String(s.grade) === String(selectedGrade);
+      });
+
+      let totalStudents = 0;
+      let totalPresentMarks = 0;
+      let totalAbsentMarks = 0;
+      let recordedPeriodSlots = 0;
+      const totalPeriodSlots = filteredSections.length * 8;
+      const periodStats = [];
+      for (let p = 1; p <= 8; p++) {
+        periodStats.push({ period: p, present: 0, absent: 0 });
+      }
+      const studentAbsenceRank = [];
+
+      filteredSections.forEach(function (sec) {
+        const students = getStudentsForSection(sec.id);
+        totalStudents += students.length;
+
+        const absByStudent = {};
+        for (let p = 1; p <= 8; p++) {
+          const map = getAttendanceMap(dateStr, sec.id, p);
+          const keys = Object.keys(map);
+          if (keys.length > 0) recordedPeriodSlots++;
+          students.forEach(function (st) {
+            const val = map[st.id];
+            if (val === `P`) {
+              totalPresentMarks++;
+              periodStats[p - 1].present++;
+            } else if (val === `A`) {
+              totalAbsentMarks++;
+              periodStats[p - 1].absent++;
+              absByStudent[st.id] = (absByStudent[st.id] || 0) + 1;
+            }
+          });
+        }
+
+        students.forEach(function (st) {
+          const cnt = absByStudent[st.id] || 0;
+          if (cnt >= 2) {
+            studentAbsenceRank.push({
+              name: st.name,
+              sectionLabel: formatSectionName(sec),
+              absences: cnt
+            });
+          }
+        });
+      });
+
+      const totalRecordedMarks = totalPresentMarks + totalAbsentMarks;
+      const attendanceRate = totalRecordedMarks > 0 ? Math.round((totalPresentMarks / totalRecordedMarks) * 100) : 0;
+
+      // KPI Grid
+      const kpiEl = document.getElementById(`mon-kpi-grid`);
+      if (kpiEl) {
+        kpiEl.innerHTML = `
+          <div class="figure-card accent-navy">
+            <span class="figure-label">إجمالي الطلاب المقيدين</span>
+            <span class="figure-value">` + fmtNum(totalStudents) + `</span>
+            <span class="figure-note">في ` + fmtNum(filteredSections.length) + ` شعبة دراسية</span>
+          </div>
+          <div class="figure-card accent-emerald">
+            <span class="figure-label">نسبة الحضور المرصودة اليوم</span>
+            <span class="figure-value">` + fmtNum(attendanceRate) + `%</span>
+            <span class="figure-note">` + fmtNum(totalPresentMarks) + ` سجل حضور</span>
+          </div>
+          <div class="figure-card accent-ruby">
+            <span class="figure-label">إجمالي حالات الغياب اليوم</span>
+            <span class="figure-value">` + fmtNum(totalAbsentMarks) + `</span>
+            <span class="figure-note">` + fmtNum(studentAbsenceRank.length) + ` طالب بغياب متكرر (٢+)</span>
+          </div>
+          <div class="figure-card">
+            <span class="figure-label">الحصص المرصودة</span>
+            <span class="figure-value">` + fmtNum(recordedPeriodSlots) + ` / ` + fmtNum(totalPeriodSlots) + `</span>
+            <span class="figure-note">عبر الحصص (١ – ٨)</span>
+          </div>
+        `;
+      }
+
+      // SVG Bar Chart for Periods 1-8
+      renderPeriodAnalyticsChart(periodStats);
+
+      // Frequent Absentees Panel
+      const alertsEl = document.getElementById(`mon-alerts-list`);
+      if (alertsEl) {
+        studentAbsenceRank.sort(function (a, b) { return b.absences - a.absences; });
+        if (studentAbsenceRank.length === 0) {
+          alertsEl.innerHTML = `<div class="inline-alert success">لا توجد حالات غياب متكررة (حصتان فأكثر) في هذا التاريخ.</div>`;
+        } else {
+          alertsEl.innerHTML = studentAbsenceRank.slice(0, 6).map(function (item) {
+            return `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem 0; border-bottom: var(--hairline);">
+                <div>
+                  <div style="font-weight:700;">` + escapeHtml(item.name) + `</div>
+                  <div class="field-label">` + item.sectionLabel + `</div>
+                </div>
+                <span class="badge badge-ruby">` + fmtNum(item.absences) + ` حصص غياب</span>
+              </div>
+            `;
+          }).join(``);
+        }
+      }
+
+      // Monitoring Matrix Table
+      const matrixBody = document.getElementById(`mon-matrix-body`);
+      if (matrixBody) {
+        if (filteredSections.length === 0) {
+          matrixBody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: var(--space-lg);">لا توجد صفوف أو شعب مضافة حالياً. يرجى التوجه إلى تبويب إدارة النظام لتهيئة الصفوف.</td></tr>`;
+          return;
+        }
+        matrixBody.innerHTML = filteredSections.map(function (sec) {
+          const students = getStudentsForSection(sec.id);
+          let periodCells = ``;
+          for (let p = 1; p <= 8; p++) {
+            const map = getAttendanceMap(dateStr, sec.id, p);
+            let pCount = 0;
+            let aCount = 0;
+            students.forEach(function (st) {
+              if (map[st.id] === `P`) pCount++;
+              else if (map[st.id] === `A`) aCount++;
+            });
+            if (pCount === 0 && aCount === 0) {
+              periodCells += `<td style="text-align:center;"><span class="badge" style="background:var(--surface-container); color:var(--on-surface-variant);">—</span></td>`;
+            } else if (aCount === 0) {
+              periodCells += `<td style="text-align:center;"><span class="badge badge-emerald">` + fmtNum(pCount) + `✓</span></td>`;
+            } else {
+              periodCells += `<td style="text-align:center;"><span class="badge badge-ruby">` + fmtNum(aCount) + `غ</span></td>`;
+            }
+          }
+          return `
+            <tr>
+              <td style="font-weight:700;">` + formatSectionName(sec) + `</td>
+              <td>` + fmtNum(students.length) + `</td>
+              ` + periodCells + `
+              <td>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openSectionReport('` + sec.id + `')">عرض الكشف</button>
+              </td>
+            </tr>
+          `;
+        }).join(``);
+      }
+    }
+
+    function renderPeriodAnalyticsChart(periodStats) {
+      const container = document.getElementById(`mon-chart-container`);
+      if (!container) return;
+
+      const maxVal = Math.max(5, ...periodStats.map(function (d) { return d.present + d.absent; }));
+      const svgW = 560;
+      const svgH = 220;
+      const padLeft = 36;
+      const padRight = 16;
+      const padTop = 20;
+      const padBottom = 34;
+      const plotW = svgW - padLeft - padRight;
+      const plotH = svgH - padTop - padBottom;
+      const colW = plotW / 8;
+
+      let barsSvg = ``;
+      // Horizontal guide lines
+      for (let step = 0; step <= 4; step++) {
+        const y = padTop + plotH - (step / 4) * plotH;
+        const val = Math.round((step / 4) * maxVal);
+        barsSvg += `<line x1="` + padLeft + `" y1="` + y + `" x2="` + (svgW - padRight) + `" y2="` + y + `" stroke="var(--outline-variant)" stroke-width="1"/>`;
+        barsSvg += `<text x="` + (padLeft - 6) + `" y="` + (y + 4) + `" text-anchor="end" font-size="11" fill="var(--on-surface-variant)">` + fmtNum(val) + `</text>`;
+      }
+
+      periodStats.forEach(function (d, idx) {
+        const cx = padLeft + idx * colW + colW / 2;
+        const barW = 16;
+        const pH = (d.present / maxVal) * plotH;
+        const aH = (d.absent / maxVal) * plotH;
+        const pY = padTop + plotH - pH;
+        const aY = padTop + plotH - aH;
+
+        barsSvg += `<rect x="` + (cx - barW - 2) + `" y="` + pY + `" width="` + barW + `" height="` + pH + `" fill="var(--secondary)" rx="2"/>`;
+        barsSvg += `<rect x="` + (cx + 2) + `" y="` + aY + `" width="` + barW + `" height="` + aH + `" fill="var(--error)" rx="2"/>`;
+        if (d.present > 0) {
+          barsSvg += `<text x="` + (cx - barW / 2 - 2) + `" y="` + (pY - 4) + `" text-anchor="middle" font-size="10" font-weight="700" fill="var(--secondary)">` + fmtNum(d.present) + `</text>`;
+        }
+        if (d.absent > 0) {
+          barsSvg += `<text x="` + (cx + barW / 2 + 2) + `" y="` + (aY - 4) + `" text-anchor="middle" font-size="10" font-weight="700" fill="var(--error)">` + fmtNum(d.absent) + `</text>`;
+        }
+        barsSvg += `<text x="` + cx + `" y="` + (svgH - 10) + `" text-anchor="middle" font-size="12" font-weight="700" fill="var(--primary)">ح` + fmtNum(d.period) + `</text>`;
+      });
+
+      container.innerHTML = `
+        <div style="display:flex; gap:var(--space-md); font-size:var(--label-size); font-weight:700;">
+          <span style="display:inline-flex; align-items:center; gap:0.35rem; color:var(--secondary);">
+            <span style="width:12px; height:12px; background:var(--secondary); display:inline-block; border-radius:2px;"></span> حضور
+          </span>
+          <span style="display:inline-flex; align-items:center; gap:0.35rem; color:var(--error);">
+            <span style="width:12px; height:12px; background:var(--error); display:inline-block; border-radius:2px;"></span> غياب
+          </span>
+        </div>
+        <svg viewBox="0 0 ` + svgW + ` ` + svgH + `" style="width:100%; height:auto; max-height:240px;" role="img" aria-label="رسم بياني للحضور والغياب عبر الحصص">
+          <line x1="` + padLeft + `" y1="` + (padTop + plotH) + `" x2="` + (svgW - padRight) + `" y2="` + (padTop + plotH) + `" stroke="var(--outline)" stroke-width="2"/>
+          ` + barsSvg + `
+        </svg>
+      `;
+    }
+
+    function openSectionReport(sectionId) {
+      const monDate = document.getElementById(`mon-date-input`);
+      const repDate = document.getElementById(`rep-date-input`);
+      if (monDate && repDate && monDate.value) repDate.value = monDate.value;
+      ui.selectedSectionId = sectionId;
+      ui.supMonSubTab = `reports`;
+      refreshSupervisorDashboard();
+    }
+
+    // =========================================================================
+    // TAB 1B: التقارير والاعتمادات (Reports & Approvals + A4 Print)
+    // =========================================================================
+    function renderReportsTab() {
+      const dateInput = document.getElementById(`rep-date-input`);
+      const secSelect = document.getElementById(`rep-section-select`);
+      const dateStr = dateInput && dateInput.value ? dateInput.value : getTodayDateISO();
+
+      for (let p = 1; p <= 8; p++) {
+        const th = document.getElementById(`th-p-` + p);
+        if (th) th.textContent = `ح` + fmtNum(p);
+      }
+
+      if (secSelect) {
+        if (appState.sections.length === 0) {
+          secSelect.innerHTML = `<option value="">لا توجد شعب مضافة</option>`;
+        } else {
+          secSelect.innerHTML = appState.sections.map(function (s) {
+            return `<option value="` + s.id + `">` + formatSectionName(s) + `</option>`;
+          }).join(``);
+          const exists = appState.sections.some(function (s) { return s.id === ui.selectedSectionId; });
+          if (!exists) ui.selectedSectionId = appState.sections[0].id;
+          secSelect.value = ui.selectedSectionId;
+        }
+      }
+
+      const activeSecId = secSelect ? secSelect.value : null;
+      const activeSec = appState.sections.find(function (s) { return s.id === activeSecId; }) || null;
+      if (activeSec) ui.selectedSectionId = activeSec.id;
+
+      // Approval status
+      const approvalKey = dateStr + `__` + (activeSecId || ``);
+      const isApproved = Boolean(appState.approvals[approvalKey]);
+      const appBadge = document.getElementById(`report-approval-badge`);
+      const appBtn = document.getElementById(`btn-approve-report`);
+      const screenStamp = document.getElementById(`screen-approval-stamp`);
+
+      if (appBadge) {
+        appBadge.className = isApproved ? `badge badge-emerald` : `badge badge-gold`;
+        appBadge.textContent = isApproved ? `معتمد من مدير المدرسة ✓` : `قيد المراجعة`;
+      }
+      if (appBtn) {
+        appBtn.textContent = isApproved ? `إلغاء الاعتماد` : `اعتماد الكشف`;
+        appBtn.className = isApproved ? `btn btn-gold-outline` : `btn btn-emerald`;
+      }
+      if (screenStamp) {
+        screenStamp.textContent = isApproved ? `معتمد بتاريخ ` + fmtNum(dateStr) : `التوقيع والختم المدرسي`;
+      }
+
+      const tbody = document.getElementById(`report-table-body`);
+      const printMeta = document.getElementById(`print-meta-col`);
+      if (!tbody) return;
+
+      if (!activeSec) {
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:var(--space-lg);">لا توجد شعبة محددة لعرض التقرير.</td></tr>`;
+        return;
+      }
+
+      const students = getStudentsForSection(activeSec.id);
+      if (printMeta) {
+        printMeta.innerHTML = `
+          <div>الصف والشعبة: ` + formatSectionName(activeSec) + `</div>
+          <div>التاريخ: ` + fmtNum(dateStr) + `</div>
+          <div>عدد الطلاب: ` + fmtNum(students.length) + `</div>
+        `;
+      }
+
+      if (students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:var(--space-lg);">لا يوجد طلاب مسجلون في ` + formatSectionName(activeSec) + `.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = students.map(function (st) {
+        let totalP = 0;
+        let totalA = 0;
+        let periodCells = ``;
+        for (let p = 1; p <= 8; p++) {
+          const map = getAttendanceMap(dateStr, activeSec.id, p);
+          const mark = map[st.id] || ``;
+          let markText = `—`;
+          let cls = ``;
+          if (mark === `P`) {
+            totalP++;
+            markText = `✓`;
+            cls = `mark-p`;
+          } else if (mark === `A`) {
+            totalA++;
+            markText = `✗`;
+            cls = `mark-a`;
+          }
+          periodCells += `
+            <td class="col-period">
+              <button type="button" class="cell-mark-btn ` + cls + `" title="تبديل حالة الحصة ` + fmtNum(p) + `" onclick="cycleSupervisorCell('` + dateStr + `','` + activeSec.id + `',` + p + `,'` + st.id + `')">` + markText + `</button>
+            </td>
+          `;
+        }
+        return `
+          <tr>
+            <td class="col-serial">` + fmtNum(st.serial) + `</td>
+            <td class="col-student">` + escapeHtml(st.name) + `</td>
+            ` + periodCells + `
+            <td class="col-total" style="color: var(--secondary);">` + fmtNum(totalP) + `</td>
+            <td class="col-total" style="color: var(--error);">` + fmtNum(totalA) + `</td>
+          </tr>
+        `;
+      }).join(``);
+    }
+
+    async function cycleSupervisorCell(dateStr, sectionId, period, studentId) {
+      const map = getAttendanceMap(dateStr, sectionId, period);
+      const curr = map[studentId] || null;
+      let next = `P`;
+      if (curr === `P`) next = `A`;
+      else if (curr === `A`) next = null;
+      setStudentAttendanceRecord(dateStr, sectionId, period, studentId, next);
+      await persistAppState();
+      renderReportsTab();
+    }
+
+    async function toggleReportApproval() {
+      const dateInput = document.getElementById(`rep-date-input`);
+      const secSelect = document.getElementById(`rep-section-select`);
+      const dateStr = dateInput && dateInput.value ? dateInput.value : getTodayDateISO();
+      const secId = secSelect ? secSelect.value : ``;
+      if (!secId) return;
+
+      const key = dateStr + `__` + secId;
+      appState.approvals[key] = !appState.approvals[key];
+      await persistAppState();
+      renderReportsTab();
+    }
+
+    function exportReportCSV() {
+      const dateInput = document.getElementById(`rep-date-input`);
+      const secSelect = document.getElementById(`rep-section-select`);
+      const dateStr = dateInput && dateInput.value ? dateInput.value : getTodayDateISO();
+      const secId = secSelect ? secSelect.value : ``;
+      const activeSec = appState.sections.find(function (s) { return s.id === secId; });
+      if (!activeSec) return;
+
+      const students = getStudentsForSection(activeSec.id);
+      const headers = [`م`, `اسم الطالب`, `ح1`, `ح2`, `ح3`, `ح4`, `ح5`, `ح6`, `ح7`, `ح8`, `إجمالي الحضور`, `إجمالي الغياب`];
+      const rows = [headers.join(`,`)];
+
+      students.forEach(function (st) {
+        let pSum = 0;
+        let aSum = 0;
+        const marks = [];
+        for (let p = 1; p <= 8; p++) {
+          const m = getAttendanceMap(dateStr, activeSec.id, p)[st.id] || ``;
+          if (m === `P`) { pSum++; marks.push(`حاضر`); }
+          else if (m === `A`) { aSum++; marks.push(`غائب`); }
+          else { marks.push(`-`); }
+        }
+        rows.push([st.serial, `"` + st.name.replace(/"/g, `""`) + `"`, ...marks, pSum, aSum].join(`,`));
+      });
+
+      const bomCsv = `\uFEFF` + rows.join(`\n`);
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content: bomCsv,
+          contentType: `text/csv`,
+          encoding: `UTF-8`,
+          filename: `attendance_` + activeSec.id + `_` + dateStr + `.csv`
+        });
+      }
+    }
+
+    function printA4Report() {
+      window.print();
+    }
+
+    // =========================================================================
+    // TAB 2A: تهيئة الفصول والجدول الزمني (Dynamic Classes & Smart Import)
+    // =========================================================================
+    function renderClassesManagementTab() {
+      sortSectionsAscending();
+
+      // Update Delete Whole Grade Select
+      const delGradeSel = document.getElementById(`delete-grade-select`);
+      if (delGradeSel) {
+        const gradesMap = {};
+        appState.sections.forEach(function (s) { gradesMap[s.grade] = true; });
+        const grades = Object.keys(gradesMap).map(Number).sort(function (a, b) { return a - b; });
+        if (grades.length === 0) {
+          delGradeSel.innerHTML = `<option value="">لا توجد صفوف</option>`;
+        } else {
+          delGradeSel.innerHTML = grades.map(function (g) {
+            return `<option value="` + g + `">الصف ` + fmtNum(g) + `</option>`;
+          }).join(``);
+        }
+      }
+
+      // Sections Grid
+      const grid = document.getElementById(`sections-grid-container`);
+      if (grid) {
+        if (appState.sections.length === 0) {
+          grid.innerHTML = `<div class="inline-alert warning" style="grid-column: 1 / -1;">القوائم مصفرة وفارغة حالياً. يمكنك إضافة صف وشعبة من النموذج أعلاه للبدء.</div>`;
+        } else {
+          const exists = appState.sections.some(function (s) { return s.id === ui.selectedSectionId; });
+          if (!exists) ui.selectedSectionId = appState.sections[0].id;
+
+          grid.innerHTML = appState.sections.map(function (sec) {
+            const count = getStudentsForSection(sec.id).length;
+            const isAct = sec.id === ui.selectedSectionId;
+            return `
+              <div class="section-tile ` + (isAct ? `active` : ``) + `" style="flex-direction:row;align-items:center;gap:.25rem;padding:.2rem .4rem;">
+                <button type="button" class="section-tile-select" style="flex:1;text-align:right;" onclick="selectManageSection('` + sec.id + `')">
+                  <span class="section-tile-title">` + formatSectionName(sec) + `</span>
+                </button>
+                <button type="button" class="btn btn-ruby btn-sm" title="حذف الشعبة" onclick="handleDeleteSection('` + sec.id + `', this)">✕</button>
+              </div>
+            `;
+          }).join(``);
+        }
+      }
+
+      renderSelectedSectionRoster();
+      renderBellScheduleEditor();
+    }
+
+    function showClassesFeedback(msg, isError) {
+      const box = document.getElementById(`classes-feedback`);
+      if (!box) return;
+      box.className = isError ? `inline-alert error` : `inline-alert success`;
+      box.textContent = msg;
+      box.classList.remove(`hidden`);
+    }
+
+    function selectManageSection(secId) {
+      ui.selectedSectionId = secId;
+      renderClassesManagementTab();
+    }
+
+    function stepSecCount(d) {
+      const el = document.getElementById('new-section-count'); if (!el) return;
+      el.value = Math.min(30, Math.max(1, (Number(el.value) || 1) + d));
+    }
+    function addGradeOption() {
+      const ex = document.getElementById('new-grade-extra'), sel = document.getElementById('new-grade-input');
+      const g = Number(ex && ex.value); if (!g || g < 1 || g > 13) return;
+      if (!Array.from(sel.options).some(function (o) { return Number(o.value) === g; })) {
+        const o = document.createElement('option'); o.value = g; o.textContent = 'الصف ' + g; sel.appendChild(o);
+      }
+      sel.value = String(g); ex.value = '';
+    }
+    async function handleAddSectionSubmit(event) {
+      event.preventDefault();
+      const grade = Number(document.getElementById('new-grade-input').value);
+      const count = Math.min(30, Math.max(1, Number(document.getElementById('new-section-count').value) || 0));
+      if (!grade || !count) return;
+      let added = 0;
+      for (let i = 1; i <= count; i++) {
+        const id = grade + '-' + i;
+        if (appState.sections.some(function (s) { return s.id === id; })) continue;
+        appState.sections.push({ id: id, grade: grade, section: String(i) });
+        if (!appState.studentsBySection[id]) appState.studentsBySection[id] = [];
+        added++;
+      }
+      sortSectionsAscending();
+      ui.selectedSectionId = grade + '-1';
+      await persistAppState();
+      showClassesFeedback(added ? 'تمت إضافة ' + fmtNum(added) + ' شعبة للصف ' + fmtNum(grade) + '.' : 'الشعب موجودة بالفعل.', !added);
+      renderClassesManagementTab();
+    }
+
+    const DEFAULT_SUBJECTS = ['التربية الإسلامية','اللغة العربية','اللغة الإنجليزية','الرياضيات','الفيزياء','الكيمياء','الأحياء','العلوم البيئية','الدراسات الاجتماعية','خدمة التوجيه المهني','تقنية المعلومات','الرياضة المدرسية','المهارات الحياتية','الفنون التشكيلية','المهارات الموسيقية'];
+    function renderSubjectsUI() {
+      const subs = appState.subjects || [];
+      const chips = document.getElementById('subjects-chips');
+      if (chips) chips.innerHTML = subs.map(function (s, i) {
+        return '<span class="badge badge-navy" style="display:inline-flex;gap:.4rem;align-items:center;">' + escapeHtml(s) + '<button type="button" onclick="removeSubject(' + i + ')" title="حذف" style="border:0;background:none;color:inherit;cursor:pointer;font-weight:700;">✕</button></span>';
+      }).join('');
+      const opts = subs.map(function (s) { return '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>'; }).join('');
+      const sel = document.getElementById('teacher-subject-input');
+      if (sel) { const cur = sel.value; sel.innerHTML = opts; if (cur) sel.value = cur; }
+      const rs = document.getElementById('report-subject-select');
+      if (rs) { const cur = rs.value; rs.innerHTML = '<option value="">كل التخصصات</option>' + opts; rs.value = cur; }
+    }
+    async function addSubject() {
+      const el = document.getElementById('new-subject-input'); const v = el.value.trim();
+      if (!v || appState.subjects.indexOf(v) >= 0) return;
+      appState.subjects.push(v); el.value = '';
+      await persistAppState(); renderSubjectsUI();
+    }
+    async function removeSubject(i) {
+      appState.subjects.splice(i, 1);
+      await persistAppState(); renderSubjectsUI();
+    }
+    function editTeacher(id) {
+      const tc = appState.teachers.find(function (x) { return x.id === id; }); if (!tc) return;
+      ui.editingTeacherId = id;
+      document.getElementById('teacher-fullname-input').value = tc.fullName;
+      document.getElementById('teacher-username-input').value = tc.username;
+      document.getElementById('teacher-password-input').value = '';
+      const sel = document.getElementById('teacher-subject-input');
+      if (!Array.from(sel.options).some(function (o) { return o.value === tc.subject; })) {
+        const o = document.createElement('option'); o.value = tc.subject; o.textContent = tc.subject; sel.appendChild(o);
+      }
+      sel.value = tc.subject;
+      document.querySelectorAll('input[name="new-teacher-sec"]').forEach(function (cb) { cb.checked = (tc.sections || []).indexOf(cb.value) >= 0; });
+      document.getElementById('teacher-submit-btn').textContent = 'حفظ التعديلات';
+      document.getElementById('add-teacher-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    function downloadTeachersTemplate() {
+      const ws = XLSX.utils.aoa_to_sheet([['المسلسل','الاسم','التخصص'],[1,'اسم المعلم (مثال)','الرياضيات']]);
+      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'المعلمون');
+      window.notebookAppApi.triggerFileDownload({ content: XLSX.write(wb, { type: 'array', bookType: 'xlsx' }), filename: 'teachers_template.xlsx' });
+    }
+    function importTeachersXlsx() {
+      const f = document.getElementById('teachers-xlsx-input').files[0];
+      if (!f) { showTeachersFeedback('اختر ملف Excel أولاً.', true); return; }
+      if (typeof XLSX === 'undefined') { showTeachersFeedback('تعذر تحميل مكتبة Excel. تحقق من الاتصال بالإنترنت.', true); return; }
+      const fr = new FileReader();
+      fr.onload = async function () {
+        try {
+          const wb = XLSX.read(fr.result, { type: 'array' });
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
+          let added = 0, skipped = 0;
+          rows.forEach(function (r, idx) {
+            const name = String(r[1] || '').trim(), subj = String(r[2] || '').trim();
+            if (!name || (idx === 0 && name.indexOf('الاسم') >= 0)) return;
+            if (appState.teachers.some(function (x) { return x.fullName === name; })) { skipped++; return; }
+            if (subj && appState.subjects.indexOf(subj) < 0) appState.subjects.push(subj);
+            appState.teachers.push({ id: 't-' + Date.now() + '-' + idx, username: '', password: '12345', fullName: name, subject: subj || 'غير محدد', sections: [], mustForceChange: true, active: false, imported: true });
+            added++;
+          });
+          document.getElementById('teachers-xlsx-input').value = '';
+          await persistAppState();
+          showTeachersFeedback('تم استيراد ' + fmtNum(added) + ' معلم' + (skipped ? ' (تخطي ' + fmtNum(skipped) + ' مكرر)' : '') + '. حدّد اسم الدخول وكلمة المرور والشعب لكل معلم من زر «تعديل».', false);
+          renderTeachersManagementTab();
+        } catch (e) { showTeachersFeedback('تعذر قراءة الملف. تأكد أنه بصيغة xlsx.', true); }
+      };
+      fr.readAsArrayBuffer(f);
+    }
+
+    function teacherReportRows() {
+      const f = document.getElementById('report-subject-select').value;
+      return appState.teachers.filter(function (x) { return !f || x.subject === f; }).map(function (x) {
+        const secs = (x.sections || []).map(function (sid) { return appState.sections.find(function (s) { return s.id === sid; }); }).filter(Boolean).map(formatSectionName);
+        return { name: x.fullName, subject: x.subject, secs: secs, count: secs.length };
+      });
+    }
+    function showTeacherReport() {
+      const rows = teacherReportRows();
+      document.getElementById('teacher-report-box').innerHTML = '<table><thead><tr><th>المعلم</th><th>التخصص</th><th>الصفوف والشعب المسندة</th><th>عدد الشعب</th></tr></thead><tbody>' +
+        rows.map(function (r) { return '<tr><td style="font-weight:700;">' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.subject) + '</td><td>' + escapeHtml(r.secs.join('، ')) + '</td><td>' + fmtNum(r.count) + '</td></tr>'; }).join('') + '</tbody></table>';
+    }
+    function exportTeacherReport() {
+      const rows = teacherReportRows();
+      const csv = '\uFEFF' + ['المعلم,التخصص,الصفوف والشعب,عدد الشعب'].concat(rows.map(function (r) {
+        return ['"' + r.name.replace(/"/g, '""') + '"', '"' + r.subject.replace(/"/g, '""') + '"', '"' + r.secs.join(' | ') + '"', r.count].join(',');
+      })).join('\n');
+      window.notebookAppApi.triggerFileDownload({ content: csv, contentType: 'text/csv', encoding: 'UTF-8', filename: 'teachers_report.csv' });
+    }
+
+    async function handleDeleteSection(secId, btn) {
+      if (btn && btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.textContent = `تأكيد الحذف؟`;
+        return;
+      }
+      appState.sections = appState.sections.filter(function (s) { return s.id !== secId; });
+      delete appState.studentsBySection[secId];
+      appState.teachers.forEach(function (t) {
+        t.sections = (t.sections || []).filter(function (id) { return id !== secId; });
+      });
+      sortSectionsAscending();
+      ui.selectedSectionId = appState.sections.length > 0 ? appState.sections[0].id : null;
+
+      await persistAppState();
+      showClassesFeedback(`تم حذف الشعبة وقائمتها بنجاح مع إعادة الترتيب التصاعدي.`, false);
+      renderClassesManagementTab();
+    }
+
+    async function handleDeleteWholeGrade(btn) {
+      const sel = document.getElementById(`delete-grade-select`);
+      if (!sel || !sel.value) return;
+      const grade = Number(sel.value);
+      if (btn && btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.textContent = `تأكيد حذف الصف؟`;
+        return;
+      }
+      if (btn) {
+        btn.dataset.armed = `false`;
+        btn.textContent = `حذف الصف`;
+      }
+
+      const removedIds = {};
+      appState.sections.forEach(function (s) {
+        if (Number(s.grade) === grade) removedIds[s.id] = true;
+      });
+      appState.sections = appState.sections.filter(function (s) { return Number(s.grade) !== grade; });
+      Object.keys(removedIds).forEach(function (id) { delete appState.studentsBySection[id]; });
+      appState.teachers.forEach(function (t) {
+        t.sections = (t.sections || []).filter(function (id) { return !removedIds[id]; });
+      });
+      sortSectionsAscending();
+      ui.selectedSectionId = appState.sections.length > 0 ? appState.sections[0].id : null;
+
+      await persistAppState();
+      showClassesFeedback(`تم حذف الصف ` + fmtNum(grade) + ` بجميع شعبه وطلابه.`, false);
+      renderClassesManagementTab();
+    }
+
+    async function handleResetAllClasses(btn) {
+      if (btn && btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.textContent = `اضغط مجدداً للتفريغ النهائي`;
+        return;
+      }
+      if (btn) {
+        btn.dataset.armed = `false`;
+        btn.textContent = `تصفير وتفريغ الصفوف والقوائم`;
+      }
+      appState.sections = [];
+      appState.studentsBySection = {};
+      appState.teachers.forEach(function (t) { t.sections = []; });
+      ui.selectedSectionId = null;
+
+      await persistAppState();
+      showClassesFeedback(`تم تصفير وتفريغ جميع الصفوف والشعب وقوائم الطلاب. النظام جاهز للتهيئة الجديدة.`, false);
+      renderClassesManagementTab();
+    }
+
+    async function restoreSampleClasses() {
+      const def = getDefaultSeedState();
+      appState.sections = def.sections;
+      appState.studentsBySection = def.studentsBySection;
+      sortSectionsAscending();
+      ui.selectedSectionId = appState.sections[0].id;
+      appState.teachers.forEach(function (t) {
+        if (t.username === `nabil anwer`) {
+          t.sections = appState.sections.map(function (s) { return s.id; });
+        }
+      });
+      await persistAppState();
+      showClassesFeedback(`تمت استعادة البيانات النموذجية للصفوف والشعب.`, false);
+      renderClassesManagementTab();
+    }
+
+    function renderSelectedSectionRoster() {
+      const titleEl = document.getElementById(`roster-panel-title`);
+      const countBadge = document.getElementById(`roster-count-badge`);
+      const bodyEl = document.getElementById(`roster-panel-body`);
+      if (!bodyEl) return;
+
+      const sec = appState.sections.find(function (s) { return s.id === ui.selectedSectionId; });
+      if (!sec) {
+        if (titleEl) titleEl.textContent = `قائمة الطلاب`;
+        if (countBadge) countBadge.textContent = fmtNum(0);
+        bodyEl.innerHTML = `<div class="inline-alert warning">يرجى إضافة شعبة أو اختيارها من القائمة لعرض طلابها أو استيراد أسماء جديدة.</div>`;
+        return;
+      }
+
+      const students = getStudentsForSection(sec.id);
+      if (titleEl) titleEl.textContent = `قائمة طلاب: ` + formatSectionName(sec);
+      if (countBadge) countBadge.textContent = fmtNum(students.length) + ` طالب`;
+
+      const rowsHtml = students.length === 0
+        ? `<tr><td colspan="3" style="text-align:center; padding: var(--space-md);">القائمة فارغة. قم باستيراد أسماء الطلاب أدناه.</td></tr>`
+        : students.map(function (st) {
+            return `
+              <tr>
+                <td style="text-align:center; font-weight:700; width:64px;">` + fmtNum(st.serial) + `</td>
+                <td style="font-weight:600;">` + escapeHtml(st.name) + `</td>
+                <td style="width:90px; text-align:center;">
+                  <button type="button" class="btn btn-ruby btn-sm" onclick="removeSingleStudent('` + sec.id + `','` + st.id + `')">حذف</button>
+                </td>
+              </tr>
+            `;
+          }).join(``);
+
+      bodyEl.innerHTML = `
+        <!-- Smart Name-Only Import -->
+        <div style="margin-bottom: var(--space-md); padding: var(--space-md); background: var(--surface-container-low); border: var(--hairline); border-radius: var(--rounded);">
+          <div class="field-group" style="margin-bottom: var(--space-sm);">
+            <label for="import-mode-select" class="field-label">طريقة الاستيراد (تمنع التكرار وتُرتب الأسماء أبجدياً مع تسلسل رقمي تلقائي)</label>
+            <select id="import-mode-select" class="select-control">
+              <option value="replace">استبدال قائمة الشعبة الحالية بالأسماء الجديدة</option>
+              <option value="append">إضافة إلى الأسماء الحالية وإعادة الترتيب الأبجدي</option>
+            </select>
+          </div>
+
+          <div class="field-group" style="margin-bottom: var(--space-sm);">
+            <label for="import-names-textarea" class="field-label">لصق أسماء الطلاب فقط (اسم في كل سطر) أو رفع ملف نصي</label>
+            <textarea id="import-names-textarea" class="textarea-control" placeholder="أحمد بن سالم...&#10;بدر بن علي..."></textarea>
+          </div>
+
+          <div class="form-row-aligned" style="justify-content: space-between;">
+            <div class="field-group">
+              <label for="import-file-input" class="field-label">رفع ملف أسماء (.txt / .csv)</label>
+              <input type="file" id="import-file-input" accept=".txt,.csv" class="input-control" style="padding: 0.4rem;" onchange="readNamesFileToTextarea(this)">
+            </div>
+            <button type="button" class="btn btn-emerald" onclick="applyStudentImport('` + sec.id + `')">استيراد وترتيب أبجدي وتسلسل تلقائي</button>
+          </div>
+        </div>
+
+        <!-- Single Quick Add -->
+        <form class="form-row-aligned" style="margin-bottom: var(--space-md);" onsubmit="addSingleStudent(event, '` + sec.id + `')">
+          <div class="field-group" style="flex: 1;">
+            <label for="single-student-name" class="field-label">إضافة طالب واحد</label>
+            <input type="text" id="single-student-name" class="input-control" required>
+          </div>
+          <button type="submit" class="btn btn-secondary">إضافة وترتيب</button>
+        </form>
+
+        <!-- Roster Table -->
+        <div class="table-scroll" style="max-height: 360px; overflow-y: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align:center;">التسلسل</th>
+                <th>اسم الطالب (مرتب أبجدياً)</th>
+                <th style="text-align:center;">إجراء</th>
+              </tr>
+            </thead>
+            <tbody>` + rowsHtml + `</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function readNamesFileToTextarea(input) {
+      if (!input || !input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const ta = document.getElementById(`import-names-textarea`);
+        if (ta && e.target && typeof e.target.result === `string`) {
+          const lines = e.target.result.split(/\r?\n/).map(function (row) {
+            // Take first meaningful text token if CSV contains commas, ignoring pure numbers
+            const parts = row.split(`,`).map(function (c) { return c.replace(/^"|"$/g, ``).trim(); });
+            const textPart = parts.find(function (c) { return c && !/^\d+$/.test(c); });
+            return textPart || ``;
+          }).filter(function (name) {
+            return name && name !== `اسم الطالب` && name !== `الاسم`;
+          });
+          ta.value = lines.join(`\n`);
+        }
+      };
+      reader.readAsText(file, `UTF-8`);
+    }
+
+    async function applyStudentImport(secId) {
+      const ta = document.getElementById(`import-names-textarea`);
+      const modeSel = document.getElementById(`import-mode-select`);
+      if (!ta) return;
+
+      const newLines = ta.value.split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+      if (newLines.length === 0) {
+        showClassesFeedback(`يرجى كتابة أو رفع أسماء الطلاب أولاً قبل الاستيراد.`, true);
+        return;
+      }
+
+      const mode = modeSel ? modeSel.value : `replace`;
+      let combined = newLines;
+      if (mode === `append`) {
+        const existingNames = getStudentsForSection(secId).map(function (st) { return st.name; });
+        combined = existingNames.concat(newLines);
+      }
+
+      appState.studentsBySection[secId] = buildSortedStudents(secId, combined);
+      await persistAppState();
+      showClassesFeedback(`تم استيراد وترتيب ` + fmtNum(appState.studentsBySection[secId].length) + ` طالباً أبجدياً وإسناد التسلسل المنطقي بنجاح.`, false);
+      renderClassesManagementTab();
+    }
+
+    async function addSingleStudent(event, secId) {
+      event.preventDefault();
+      const input = document.getElementById(`single-student-name`);
+      if (!input) return;
+      const name = input.value.trim();
+      if (!name) return;
+
+      const currentNames = getStudentsForSection(secId).map(function (st) { return st.name; });
+      currentNames.push(name);
+      appState.studentsBySection[secId] = buildSortedStudents(secId, currentNames);
+      await persistAppState();
+      showClassesFeedback(`تمت إضافة الطالب وإعادة ترتيب القائمة أبجدياً.`, false);
+      renderClassesManagementTab();
+    }
+
+    async function removeSingleStudent(secId, studentId) {
+      const remaining = getStudentsForSection(secId).filter(function (st) { return st.id !== studentId; }).map(function (st) { return st.name; });
+      appState.studentsBySection[secId] = buildSortedStudents(secId, remaining);
+      await persistAppState();
+      showClassesFeedback(`تم حذف الطالب وتحديث التسلسل الرقمي للقائمة.`, false);
+      renderClassesManagementTab();
+    }
+
+    function renderBellScheduleEditor() {
+      const grid = document.getElementById(`bell-schedule-grid`);
+      if (!grid) return;
+
+      grid.innerHTML = appState.schedule.map(function (item, idx) {
+        return `
+          <div class="schedule-item">
+            <div style="font-weight:700; color:var(--primary);">الحصة ` + fmtNum(item.period) + ` — ` + item.label + `</div>
+            <div class="schedule-times">
+              <div class="field-group">
+                <label for="sched-start-` + idx + `" class="field-label">بداية الحصة</label>
+                <input type="time" id="sched-start-` + idx + `" class="input-control" value="` + item.start + `">
+              </div>
+              <div class="field-group">
+                <label for="sched-end-` + idx + `" class="field-label">نهاية الحصة</label>
+                <input type="time" id="sched-end-` + idx + `" class="input-control" value="` + item.end + `">
+              </div>
+            </div>
+          </div>
+        `;
+      }).join(``);
+    }
+
+    async function saveBellSchedule() {
+      for (let i = 0; i < appState.schedule.length; i++) {
+        const sEl = document.getElementById(`sched-start-` + i);
+        const eEl = document.getElementById(`sched-end-` + i);
+        if (sEl && sEl.value) appState.schedule[i].start = sEl.value;
+        if (eEl && eEl.value) appState.schedule[i].end = eEl.value;
+      }
+      await persistAppState();
+      const fb = document.getElementById(`schedule-feedback`);
+      if (fb) {
+        fb.className = `inline-alert success`;
+        fb.textContent = `تم حفظ الجدول الزمني للحصص (١ – ٨) بنجاح.`;
+        fb.classList.remove(`hidden`);
+      }
+    }
+
+    async function restoreDefaultBellSchedule() {
+      appState.schedule = JSON.parse(JSON.stringify(DEFAULT_SCHEDULE));
+      await persistAppState();
+      renderBellScheduleEditor();
+      const fb = document.getElementById(`schedule-feedback`);
+      if (fb) {
+        fb.className = `inline-alert success`;
+        fb.textContent = `تمت استعادة التوقيت المدرسي الرسمي (٠٧:١٥ – ١٣:٢٥).`;
+        fb.classList.remove(`hidden`);
+      }
+    }
+
+    // =========================================================================
+    // TAB 2B: إدارة المعلمين والصلاحيات
+    // =========================================================================
+    function renderTeachersManagementTab() {
+      renderSubjectsUI();
+      const checksBox = document.getElementById(`new-teacher-sections-checks`);
+      if (checksBox) {
+        if (appState.sections.length === 0) {
+          checksBox.innerHTML = `<span class="field-label">لا توجد شعب مهيأة حالياً.</span>`;
+        } else {
+          const gs = Array.from(new Set(appState.sections.map(function (s) { return s.grade; }))).sort(function (x, y) { return x - y; });
+          checksBox.innerHTML = gs.map(function (g) {
+            return '<fieldset style="flex:1 1 100%;border:var(--hairline);border-radius:var(--rounded);padding:.4rem .6rem;margin:0;"><legend class="field-label">الصف ' + fmtNum(g) + '</legend><div style="display:flex;flex-wrap:wrap;gap:.35rem;">' +
+              appState.sections.filter(function (s) { return s.grade === g; }).map(function (s) {
+                return '<label style="display:inline-flex;align-items:center;gap:.3rem;background:var(--surface-container-low);padding:.25rem .5rem;border:var(--hairline);border-radius:var(--rounded);cursor:pointer;"><input type="checkbox" name="new-teacher-sec" value="' + s.id + '"><span>' + formatSectionName(s) + '</span></label>';
+              }).join('') + '</div></fieldset>';
+          }).join('');
+        }
+      }
+
+      const tbody = document.getElementById(`teachers-table-body`);
+      if (!tbody) return;
+
+      tbody.innerHTML = appState.teachers.map(function (t) {
+        const secBadges = (t.sections || []).map(function (sid) {
+          const sec = appState.sections.find(function (s) { return s.id === sid; });
+          return sec ? `<span class="badge badge-navy">` + formatSectionName(sec) + `</span>` : ``;
+        }).join(` `) || `<span class="field-label">غير مسند</span>`;
+
+        const pwBadge = t.mustForceChange
+          ? `<span class="badge badge-gold">افتراضية (يلزم التغيير)</span>`
+          : `<span class="badge badge-emerald">محدّثة ومفعّلة</span>`;
+
+        return `
+          <tr><td colspan="6" style="font-weight:800;font-size:1.05em;background:var(--surface-container);color:var(--primary);">` + escapeHtml(t.fullName) + `</td></tr>
+          <tr>
+            <td dir="ltr" style="text-align:right; font-weight:600;">` + (escapeHtml(t.username) || `<span class="badge badge-gold">لم يُحدد</span>`) + `</td>
+            <td>` + escapeHtml(t.subject) + `</td>
+            <td><div style="display:flex; flex-wrap:wrap; gap:0.25rem;">` + secBadges + `</div></td>
+            <td>` + pwBadge + `</td>
+            <td><button type="button" class="btn btn-gold-outline btn-sm" onclick="resetTeacherPassword('` + t.id + `')">إعادة تعيين (12345)</button></td>
+            <td><div style="display:flex; gap:0.3rem; white-space:nowrap;">
+              <button type="button" class="btn btn-primary btn-sm" onclick="editTeacher('` + t.id + `')">تعديل</button>
+              <button type="button" class="btn btn-ruby btn-sm" onclick="deleteTeacher('` + t.id + `', this)">حذف</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="toggleTeacherActive('` + t.id + `')">` + (t.active ? `تعطيل` : `تفعيل`) + `</button>
+            </div></td>
+          </tr>`;
+      }).join(``);
+    }
+
+    function showTeachersFeedback(msg, isError) {
+      const fb = document.getElementById(`teachers-feedback`);
+      if (!fb) return;
+      fb.className = isError ? `inline-alert error` : `inline-alert success`;
+      fb.textContent = msg;
+      fb.classList.remove(`hidden`);
+    }
+
+    async function handleAddTeacherSubmit(event) {
+      event.preventDefault();
+      const nameEl = document.getElementById(`teacher-fullname-input`);
+      const userEl = document.getElementById(`teacher-username-input`);
+      const subjEl = document.getElementById(`teacher-subject-input`);
+      if (!nameEl || !userEl || !subjEl) return;
+
+      const fullName = nameEl.value.trim();
+      const username = userEl.value.trim();
+      const subject = subjEl.value.trim();
+      if (!fullName || !username) return;
+
+      const dup = appState.teachers.some(function (t) {
+        return t.id !== ui.editingTeacherId && t.username.toLowerCase() === username.toLowerCase();
+      });
+      if (dup) {
+        showTeachersFeedback(`اسم الدخول "` + username + `" مستخدم لمعلم آخر.`, true);
+        return;
+      }
+
+      const checked = Array.from(document.querySelectorAll(`input[name="new-teacher-sec"]:checked`)).map(function (cb) {
+        return cb.value;
+      });
+
+      if (ui.editingTeacherId) {
+        const et = appState.teachers.find(function (x) { return x.id === ui.editingTeacherId; });
+        if (et) { et.fullName = fullName; et.username = username; et.subject = subject || et.subject; et.sections = checked;
+          const pw = document.getElementById('teacher-password-input').value;
+          if (pw) { et.password = pw; et.mustForceChange = true; }
+          if (et.imported) { et.active = true; delete et.imported; } }
+        document.getElementById('teacher-password-input').value = '';
+        ui.editingTeacherId = null;
+        nameEl.value = ''; userEl.value = '';
+        document.getElementById('teacher-submit-btn').textContent = 'إضافة المعلم وتفعيل التغيير الإجباري عند الدخول';
+        await persistAppState();
+        showTeachersFeedback('تم حفظ تعديلات المعلم "' + fullName + '".', false);
+        renderTeachersManagementTab();
+        return;
+      }
+      appState.teachers.push({
+        id: `t-` + Date.now(),
+        username: username,
+        password: (document.getElementById('teacher-password-input').value || `12345`),
+        fullName: fullName,
+        subject: subject || `مادة دراسية`,
+        sections: checked,
+        mustForceChange: true,
+        active: true
+      });
+
+      nameEl.value = ``;
+      userEl.value = ``;
+      subjEl.value = ``;
+      document.getElementById('teacher-password-input').value = '';
+
+      await persistAppState();
+      showTeachersFeedback(`تمت إضافة المعلم "` + fullName + `" بكلمة مرور افتراضية (12345) وإلزام التغيير عند أول دخول.`, false);
+      renderTeachersManagementTab();
+    }
+
+    async function resetTeacherPassword(teacherId) {
+      const t = appState.teachers.find(function (item) { return item.id === teacherId; });
+      if (!t) return;
+      t.password = `12345`;
+      t.mustForceChange = true;
+      await persistAppState();
+      showTeachersFeedback(`تمت إعادة تعيين كلمة مرور المعلم "` + t.fullName + `" إلى (12345) وسيُجبر على تغييرها عند الدخول التالي.`, false);
+      renderTeachersManagementTab();
+    }
+
+    async function toggleTeacherActive(teacherId) {
+      const t = appState.teachers.find(function (item) { return item.id === teacherId; });
+      if (!t) return;
+      t.active = !t.active;
+      await persistAppState();
+      showTeachersFeedback(`تم تحديث حالة حساب المعلم "` + t.fullName + `".`, false);
+      renderTeachersManagementTab();
+    }
+
+    async function deleteTeacher(teacherId, btn) {
+      if (btn && btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.textContent = `تأكيد الحذف؟`;
+        return;
+      }
+      appState.teachers = appState.teachers.filter(function (t) { return t.id !== teacherId; });
+      await persistAppState();
+      showTeachersFeedback(`تم حذف حساب المعلم من النظام.`, false);
+      renderTeachersManagementTab();
+    }
+
+    // =========================================================================
+    // Teacher Workspace (Real-Time Period Lock + 9:16 Omani Avatar Card + Table)
+    // =========================================================================
+    function initTeacherWorkspace() {
+      const teacher = getCurrentTeacher();
+      const allowedIds = teacher && teacher.sections
+        ? teacher.sections.filter(function (id) {
+            return appState.sections.some(function (s) { return s.id === id; });
+          })
+        : [];
+
+      if (allowedIds.length > 0 && allowedIds.indexOf(ui.teacherSectionId) === -1) {
+        ui.teacherSectionId = allowedIds[0];
+      } else if (allowedIds.length === 0) {
+        ui.teacherSectionId = null;
+      }
+      ui.teacherCardIndex = 0;
+      renderTeacherWorkspace();
+    }
+
+    function onTeacherSectionChange() {
+      const sel = document.getElementById(`teacher-section-select`);
+      if (sel) ui.teacherSectionId = sel.value;
+      ui.teacherCardIndex = 0;
+      renderTeacherWorkspace();
+    }
+
+    function setTeacherViewMode(mode) {
+      ui.teacherViewMode = mode === `table` ? `table` : `card`;
+      const cBtn = document.getElementById(`view-btn-card`);
+      const tBtn = document.getElementById(`view-btn-table`);
+      if (cBtn) cBtn.setAttribute(`aria-pressed`, ui.teacherViewMode === `card` ? `true` : `false`);
+      if (tBtn) tBtn.setAttribute(`aria-pressed`, ui.teacherViewMode === `table` ? `true` : `false`);
+      renderTeacherWorkspace();
+    }
+
+    function renderTeacherWorkspace() {
+      const teacher = getCurrentTeacher();
+      const allowedSections = appState.sections.filter(function (s) {
+        if (!teacher || !teacher.sections || teacher.sections.length === 0) return false;
+        return teacher.sections.indexOf(s.id) !== -1;
+      });
+
+      const sel = document.getElementById(`teacher-section-select`);
+      if (sel) {
+        if (allowedSections.length === 0) {
+          sel.innerHTML = `<option value="">لا توجد شعب مسندة</option>`;
+        } else {
+          sel.innerHTML = allowedSections.map(function (s) {
+            return `<option value="` + s.id + `">` + formatSectionName(s) + `</option>`;
+          }).join(``);
+          if (!allowedSections.some(function (s) { return s.id === ui.teacherSectionId; })) {
+            ui.teacherSectionId = allowedSections[0].id;
+          }
+          sel.value = ui.teacherSectionId;
+        }
+      }
+
+      const activePeriod = getCurrentActivePeriod();
+      const isPeriodOpen = Boolean(activePeriod);
+      const timeNowStr = getFormattedNowTime();
+
+      const statusBadge = document.getElementById(`teacher-period-status-badge`);
+      const freezeBanner = document.getElementById(`teacher-freeze-banner`);
+      const markAllBtn = document.getElementById(`btn-mark-all-present`);
+
+      if (statusBadge) {
+        if (isPeriodOpen) {
+          statusBadge.className = `badge badge-emerald`;
+          statusBadge.textContent = `الوقت ` + timeNowStr + ` • ` + activePeriod.label + ` (نشطة للرصد)`;
+        } else {
+          statusBadge.className = `badge badge-ruby`;
+          statusBadge.textContent = `الوقت ` + timeNowStr + ` • خارج وقت الحصص (مجمد)`;
+        }
+      }
+
+      if (freezeBanner) {
+        if (isPeriodOpen) {
+          freezeBanner.classList.add(`hidden`);
+        } else {
+          freezeBanner.classList.remove(`hidden`);
+          freezeBanner.textContent = `التعديل مجمد حالياً: الساعة الآن ` + timeNowStr + ` وهي خارج أوقات الحصص الدراسية المحددة في الجدول الزمني (` + fmtNum(appState.schedule[0].start) + ` – ` + fmtNum(appState.schedule[7].end) + `).`;
+        }
+      }
+
+      if (markAllBtn) {
+        markAllBtn.disabled = !isPeriodOpen || !ui.teacherSectionId;
+      }
+
+      const todayStr = getTodayDateISO();
+      const students = ui.teacherSectionId ? getStudentsForSection(ui.teacherSectionId) : [];
+      const activeSec = appState.sections.find(function (s) { return s.id === ui.teacherSectionId; }) || null;
+      const periodNum = activePeriod ? activePeriod.period : 1;
+      const periodMap = ui.teacherSectionId ? getAttendanceMap(todayStr, ui.teacherSectionId, periodNum) : {};
+
+      let pCount = 0;
+      let aCount = 0;
+      students.forEach(function (st) {
+        if (periodMap[st.id] === `P`) pCount++;
+        else if (periodMap[st.id] === `A`) aCount++;
+      });
+      const pendingCount = students.length - pCount - aCount;
+
+      const kpiGrid = document.getElementById(`teacher-kpi-grid`);
+      if (kpiGrid) {
+        kpiGrid.innerHTML = `
+          <div class="figure-card accent-navy">
+            <span class="figure-label">طلاب الشعبة</span>
+            <span class="figure-value">` + fmtNum(students.length) + `</span>
+            <span class="figure-note">` + (activeSec ? formatSectionName(activeSec) : `—`) + `</span>
+          </div>
+          <div class="figure-card accent-emerald">
+            <span class="figure-label">الحاضرون (` + (activePeriod ? activePeriod.label : `آخر رصد`) + `)</span>
+            <span class="figure-value">` + fmtNum(pCount) + `</span>
+          </div>
+          <div class="figure-card accent-ruby">
+            <span class="figure-label">الغائبون</span>
+            <span class="figure-value">` + fmtNum(aCount) + `</span>
+          </div>
+          <div class="figure-card">
+            <span class="figure-label">لم يُرصد بعد</span>
+            <span class="figure-value">` + fmtNum(pendingCount) + `</span>
+          </div>
+        `;
+      }
+
+      const cardStage = document.getElementById(`teacher-card-mode-area`);
+      const tableArea = document.getElementById(`teacher-table-mode-area`);
+
+      if (ui.teacherViewMode === `card`) {
+        if (cardStage) cardStage.classList.remove(`hidden`);
+        if (tableArea) tableArea.classList.add(`hidden`);
+        renderTeacherCardStage(students, activeSec, periodMap, isPeriodOpen, activePeriod);
+      } else {
+        if (cardStage) cardStage.classList.add(`hidden`);
+        if (tableArea) tableArea.classList.remove(`hidden`);
+        renderTeacherTableMode(students, periodMap, isPeriodOpen, activePeriod);
+      }
+    }
+
+    function renderTeacherCardStage(students, activeSec, periodMap, isPeriodOpen, activePeriod) {
+      const stage = document.getElementById(`teacher-card-mode-area`);
+      if (!stage) return;
+
+      if (!activeSec || students.length === 0) {
+        stage.innerHTML = `<div class="inline-alert warning">لا يوجد طلاب في هذه الشعبة للعرض.</div>`;
+        return;
+      }
+
+      if (ui.teacherCardIndex >= students.length) ui.teacherCardIndex = students.length - 1;
+      if (ui.teacherCardIndex < 0) ui.teacherCardIndex = 0;
+
+      const st = students[ui.teacherCardIndex];
+      const status = periodMap[st.id] || null;
+      let statusBadge = `<span class="badge badge-gold">قيد الرصد</span>`;
+      if (status === `P`) statusBadge = `<span class="badge badge-emerald">حاضر ✓</span>`;
+      else if (status === `A`) statusBadge = `<span class="badge badge-ruby">غائب ✗</span>`;
+
+      const dotsHtml = students.map(function (item, idx) {
+        const s = periodMap[item.id] || ``;
+        let cls = `student-dot-btn`;
+        if (idx === ui.teacherCardIndex) cls += ` current`;
+        if (s === `P`) cls += ` present`;
+        else if (s === `A`) cls += ` absent`;
+        return `<button type="button" class="` + cls + `" onclick="jumpToStudentCard(` + idx + `)">` + fmtNum(item.serial) + `</button>`;
+      }).join(``);
+
+      stage.innerHTML = `
+        <article class="student-card-9-16" aria-label="بطاقة الطالب">
+          <div class="student-card-top">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="student-card-serial">التسلسل: ` + fmtNum(st.serial) + `</span>
+              ` + statusBadge + `
+            </div>
+            <h3 class="student-card-name">` + escapeHtml(st.name) + `</h3>
+            <div class="student-card-class">` + formatSectionName(activeSec) + ` • ` + (activePeriod ? activePeriod.label : `معاينة`) + `</div>
+          </div>
+
+          <div class="student-avatar-frame" aria-hidden="true">
+            ` + buildOmaniStudentAvatarSvg(st.serial, st.name) + `
+          </div>
+
+          <div class="student-card-actions">
+            <button type="button" class="btn btn-emerald" ` + (isPeriodOpen ? `` : `disabled`) + ` onclick="markTeacherStudent('` + st.id + `', 'P', true)">حاضر ✓</button>
+            <button type="button" class="btn btn-ruby" ` + (isPeriodOpen ? `` : `disabled`) + ` onclick="markTeacherStudent('` + st.id + `', 'A', true)">غائب ✗</button>
+          </div>
+        </article>
+
+        <div class="card-nav-controls">
+          <button type="button" class="btn btn-secondary" ` + (ui.teacherCardIndex <= 0 ? `disabled` : ``) + ` onclick="stepTeacherCard(-1)">السابق</button>
+          <span style="font-weight:700; color:var(--primary);">طالب ` + fmtNum(ui.teacherCardIndex + 1) + ` من ` + fmtNum(students.length) + `</span>
+          <button type="button" class="btn btn-secondary" ` + (ui.teacherCardIndex >= students.length - 1 ? `disabled` : ``) + ` onclick="stepTeacherCard(1)">التالي</button>
+        </div>
+
+        <div class="student-dots-strip" aria-label="الانتقال السريع بين الطلاب">` + dotsHtml + `</div>
+      `;
+    }
+
+    function renderTeacherTableMode(students, periodMap, isPeriodOpen) {
+      const tbody = document.getElementById(`teacher-table-body`);
+      if (!tbody) return;
+      if (students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:var(--space-md);">لا يوجد طلاب في الشعبة المحددة.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = students.map(function (st) {
+        const status = periodMap[st.id] || null;
+        let badge = `<span class="badge badge-gold">لم يُرصد</span>`;
+        if (status === `P`) badge = `<span class="badge badge-emerald">حاضر</span>`;
+        else if (status === `A`) badge = `<span class="badge badge-ruby">غائب</span>`;
+
+        return `
+          <tr>
+            <td style="text-align:center; font-weight:700;">` + fmtNum(st.serial) + `</td>
+            <td style="font-weight:600;">` + escapeHtml(st.name) + `</td>
+            <td style="text-align:center;">` + badge + `</td>
+            <td style="text-align:center;">
+              <div style="display:inline-flex; gap:0.4rem;">
+                <button type="button" class="btn btn-emerald btn-sm" ` + (isPeriodOpen ? `` : `disabled`) + ` onclick="markTeacherStudent('` + st.id + `', 'P', false)">حاضر</button>
+                <button type="button" class="btn btn-ruby btn-sm" ` + (isPeriodOpen ? `` : `disabled`) + ` onclick="markTeacherStudent('` + st.id + `', 'A', false)">غائب</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join(``);
+    }
+
+    async function markTeacherStudent(studentId, status, autoAdvance) {
+      const activePeriod = getCurrentActivePeriod();
+      if (!activePeriod || !ui.teacherSectionId) return;
+
+      const todayStr = getTodayDateISO();
+      setStudentAttendanceRecord(todayStr, ui.teacherSectionId, activePeriod.period, studentId, status);
+      await persistAppState();
+
+      const students = getStudentsForSection(ui.teacherSectionId);
+      if (autoAdvance && ui.teacherCardIndex < students.length - 1) {
+        ui.teacherCardIndex++;
+      }
+      renderTeacherWorkspace();
+    }
+
+    async function markRemainingPresent() {
+      const activePeriod = getCurrentActivePeriod();
+      if (!activePeriod || !ui.teacherSectionId) return;
+
+      const todayStr = getTodayDateISO();
+      const students = getStudentsForSection(ui.teacherSectionId);
+      const map = getAttendanceMap(todayStr, ui.teacherSectionId, activePeriod.period);
+
+      students.forEach(function (st) {
+        if (!map[st.id]) {
+          setStudentAttendanceRecord(todayStr, ui.teacherSectionId, activePeriod.period, st.id, `P`);
+        }
+      });
+
+      await persistAppState();
+      renderTeacherWorkspace();
+    }
+
+    function stepTeacherCard(delta) {
+      const students = getStudentsForSection(ui.teacherSectionId);
+      const next = ui.teacherCardIndex + delta;
+      if (next >= 0 && next < students.length) {
+        ui.teacherCardIndex = next;
+        renderTeacherWorkspace();
+      }
+    }
+
+    function jumpToStudentCard(idx) {
+      ui.teacherCardIndex = idx;
+      renderTeacherWorkspace();
+    }
+
+    // =========================================================================
+    // Cartoon Omani Student SVG Avatar Generator (Uses CSS Tokens Only)
+    // =========================================================================
+    function buildOmaniStudentAvatarSvg(serial, name) {
+      const skinTokens = [`var(--avatar-skin-1)`, `var(--avatar-skin-2)`, `var(--avatar-skin-3)`];
+      const kummahTokens = [`var(--avatar-kummah-1)`, `var(--avatar-kummah-2)`, `var(--avatar-kummah-3)`, `var(--avatar-kummah-4)`];
+      const seed = Number(serial || 1) + (name ? name.charCodeAt(0) : 0);
+      const skin = skinTokens[seed % skinTokens.length];
+      const kummah = kummahTokens[seed % kummahTokens.length];
+      const hasGlasses = seed % 5 === 0;
+
+      const glassesSvg = hasGlasses
+        ? `<g stroke="var(--primary)" stroke-width="2.2" fill="none">
+             <rect x="64" y="88" width="24" height="16" rx="4"/>
+             <rect x="112" y="88" width="24" height="16" rx="4"/>
+             <line x1="88" y1="95" x2="112" y2="95"/>
+           </g>`
+        : ``;
+
+      return `
+        <svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Dishdasha (Traditional Omani White Robe) & Shoulders -->
+          <path d="M26 220 C30 164, 58 148, 100 148 C142 148, 170 164, 174 220 Z" fill="var(--avatar-dishdasha)" stroke="var(--avatar-dishdasha-shade)" stroke-width="2"/>
+          <!-- Dishdasha Collar & Furakha Tassel -->
+          <path d="M84 148 L100 170 L116 148" fill="none" stroke="var(--outline)" stroke-width="2.5"/>
+          <line x1="100" y1="170" x2="100" y2="196" stroke="var(--outline)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="100" cy="198" r="4" fill="var(--outline)"/>
+
+          <!-- Neck -->
+          <rect x="87" y="130" width="26" height="24" rx="8" fill="` + skin + `"/>
+
+          <!-- Ears -->
+          <circle cx="56" cy="98" r="8" fill="` + skin + `"/>
+          <circle cx="144" cy="98" r="8" fill="` + skin + `"/>
+
+          <!-- Head -->
+          <rect x="58" y="54" width="84" height="84" rx="38" fill="` + skin + `"/>
+
+          <!-- Omani Kummah (Embroidered Cap) -->
+          <path d="M56 76 C56 44, 72 34, 100 34 C128 34, 144 44, 144 76 Z" fill="` + kummah + `"/>
+          <path d="M58 68 Q100 62 142 68" fill="none" stroke="var(--outline)" stroke-width="3" stroke-dasharray="4 4"/>
+          <path d="M64 56 Q100 50 136 56" fill="none" stroke="var(--on-primary)" stroke-width="2" stroke-dasharray="3 5" opacity="0.85"/>
+
+          <!-- Eyebrows & Friendly Eyes -->
+          <path d="M70 84 Q78 80 86 84" fill="none" stroke="var(--avatar-hair)" stroke-width="2.8" stroke-linecap="round"/>
+          <path d="M114 84 Q122 80 130 84" fill="none" stroke="var(--avatar-hair)" stroke-width="2.8" stroke-linecap="round"/>
+          <circle cx="78" cy="96" r="4.2" fill="var(--avatar-hair)"/>
+          <circle cx="122" cy="96" r="4.2" fill="var(--avatar-hair)"/>
+          ` + glassesSvg + `
+
+          <!-- Smile -->
+          <path d="M88 117 Q100 126 112 117" fill="none" stroke="var(--avatar-hair)" stroke-width="2.8" stroke-linecap="round"/>
+        </svg>
+      `;
+    }
+
+    function escapeHtml(text) {
+      return String(text || ``)
+        .replace(/&/g, `&amp;`)
+        .replace(/</g, `&lt;`)
+        .replace(/>/g, `&gt;`)
+        .replace(/"/g, `&quot;`);
+    }
+
+    // Boot Application
+    // ---- Backup / restore (device storage) ----
+    let dirtySinceBackup = false;
+    const BACKUP_SCHEMA = 1;
+    function updateBackupBtns() {
+      const on = session.loggedIn && session.role === 'supervisor';
+      ['btn-backup', 'btn-restore', 'btn-sync'].forEach(function (id) { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !on); });
+    }
+    // حفظ ملف: منصة claude إن توفرت، وإلا تنزيل المتصفح العادي
+    async function saveFileSmart(filename, data, mime) {
+      try {
+        const dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null;
+        if (dl) { await dl.save({ filename: filename, data: data }); return true; }
+      } catch (e) { if (e && e.code === 'declined') return false; }
+      try {
+        const blob = new Blob([data], { type: mime || 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        return true;
+      } catch (e) { return false; }
+    }
+    function showBackupText(txt) {
+      const w = document.createElement('div');
+      w.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+      w.innerHTML = '<div style="background:#fff;color:#000;max-width:640px;width:100%;padding:1rem;border-radius:8px;"><p style="margin:0 0 .5rem;font-weight:700;">تعذر التنزيل المباشر. انسخ النص واحفظه في ملف بصيغة .json:</p><textarea id="bk-txt" readonly style="width:100%;height:240px;direction:ltr;"></textarea><div style="margin-top:.5rem;display:flex;gap:.5rem;"><button type="button" id="bk-copy">نسخ</button><button type="button" id="bk-close">إغلاق</button></div></div>';
+      document.body.appendChild(w);
+      const ta = w.querySelector('#bk-txt'); ta.value = txt;
+      w.querySelector('#bk-copy').onclick = function () { ta.select(); try { document.execCommand('copy'); } catch (e) {} };
+      w.querySelector('#bk-close').onclick = function () { w.remove(); };
+    }
+    async function backupNow(manual) {
+      const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
+      const payload = JSON.stringify({ app: 'absence-system', schemaVersion: BACKUP_SCHEMA, exportedAt: new Date().toISOString(), state: appState }, null, 1);
+      const ok = await saveFileSmart('absence_backup_' + stamp + '.json', payload, 'application/json');
+      if (ok) dirtySinceBackup = false;
+      else if (manual) showBackupText(payload);
+      return ok;
+    }
+    async function restoreBackup(input) {
+      const f = input.files && input.files[0]; if (!f) return;
+      try {
+        const obj = JSON.parse(await f.text());
+        if (obj.app !== 'absence-system' || !obj.state || !Array.isArray(obj.state.sections) || !obj.state.supervisor) throw new Error('bad');
+        if (obj.schemaVersion > BACKUP_SCHEMA) throw new Error('newer');
+        appState = mergeSavedState(obj.state);
+        await persistAppState();
+        location.reload();
+      } catch (e) { alert('ملف النسخة الاحتياطية غير صالح أو من إصدار أحدث.'); }
+      input.value = '';
+    }
+    (function () {
+      const _persist = persistAppState, _logout = logoutUser, _enter = enterPostAuthStage;
+      window.persistAppState = async function () { dirtySinceBackup = true; return _persist.apply(this, arguments); };
+      window.enterPostAuthStage = function () { const r = _enter.apply(this, arguments); updateBackupBtns(); return r; };
+      window.logoutUser = async function () {
+        if (session.loggedIn && dirtySinceBackup) await backupNow(false);
+        const r = _logout.apply(this, arguments); updateBackupBtns(); return r;
+      };
+      window.addEventListener('beforeunload', function (e) {
+        if (dirtySinceBackup && session.loggedIn) { e.preventDefault(); e.returnValue = ''; }
+      });
+    })();
+
+    // ---- Sync with Google Apps Script (attendance records) ----
+    const SYNC_CFG_KEY = 'salalah-sync-config', SYNC_Q_KEY = 'salalah-sync-queue', SYNC_T_KEY = 'salalah-sync-times', SYNC_P_KEY = 'salalah-sync-pull';
+    let syncApplying = false, syncBusy = false, syncTimer = null;
+    function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+    function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    function syncCfg() { const c = lsGet(SYNC_CFG_KEY, null); return c && c.url && c.token ? c : null; }
+    function syncLabel() {
+      if (!syncCfg()) return 'المزامنة: غير مفعلة';
+      const n = lsGet(SYNC_Q_KEY, []).length;
+      if (!navigator.onLine) return 'بلا إنترنت' + (n ? ' (' + n + ' بانتظار الإرسال)' : '');
+      return n ? 'بانتظار الإرسال (' + n + ')' : 'تمت المزامنة';
+    }
+    function syncStatus(txt) { const el = document.getElementById('sync-status'); if (el) el.textContent = txt; }
+    async function syncCall(body) {
+      const c = syncCfg();
+      const r = await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ token: c.token }, body)) });
+      return r.json();
+    }
+    function syncSoon() { clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 1500); }
+    function syncEnqueue(dateStr, sectionId, period, studentId, status) {
+      if (syncApplying) return;
+      const id = [dateStr, sectionId, period, studentId].join('|'), now = Date.now();
+      const rec = { id: id, date: dateStr, period: period, sectionId: sectionId, teacherId: (session && (session.teacherId || session.username)) || '', studentId: studentId, status: status === null ? '' : status, updatedAt: now };
+      const q = lsGet(SYNC_Q_KEY, []).filter(function (x) { return x.id !== id; }); q.push(rec); lsSet(SYNC_Q_KEY, q);
+      const tm = lsGet(SYNC_T_KEY, {}); tm[id] = now; lsSet(SYNC_T_KEY, tm);
+      syncStatus(syncLabel()); syncSoon();
+    }
+    function syncMerge(recs) {
+      const tm = lsGet(SYNC_T_KEY, {}); let changed = false; syncApplying = true;
+      try {
+        recs.forEach(function (r) {
+          if ((tm[r.id] || 0) >= Number(r.updatedAt)) return;
+          setStudentAttendanceRecord(String(r.date), String(r.sectionId), String(r.period), String(r.studentId), r.status === '' ? null : String(r.status));
+          tm[r.id] = Number(r.updatedAt); changed = true;
+        });
+      } finally { syncApplying = false; }
+      lsSet(SYNC_T_KEY, tm); return changed;
+    }
+    async function syncNow() {
+      if (syncBusy || !syncCfg() || !navigator.onLine) { syncStatus(syncLabel()); return; }
+      syncBusy = true; syncStatus('جارٍ المزامنة…');
+      try {
+        const q = lsGet(SYNC_Q_KEY, []);
+        if (q.length) {
+          const r = await syncCall({ action: 'push', records: q });
+          if (!r.ok) throw new Error(r.error || 'push');
+          const sent = {}; q.forEach(function (x) { sent[x.id] = x.updatedAt; });
+          lsSet(SYNC_Q_KEY, lsGet(SYNC_Q_KEY, []).filter(function (x) { return sent[x.id] !== x.updatedAt; }));
+        }
+        const r2 = await syncCall({ action: 'pull', since: lsGet(SYNC_P_KEY, 0) });
+        if (!r2.ok) throw new Error(r2.error || 'pull');
+        const changed = syncMerge(r2.records || []);
+        lsSet(SYNC_P_KEY, r2.serverTime || 0);
+        if (changed) { await persistAppState(); if (typeof refreshActiveView === 'function') refreshActiveView(); }
+        syncStatus(syncLabel());
+      } catch (e) { syncStatus('تعذرت المزامنة — ستُعاد'); }
+      finally { syncBusy = false; }
+    }
+    function openSyncSettings() {
+      const c = syncCfg() || { url: '', token: '' };
+      const w = document.createElement('div');
+      w.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+      w.innerHTML = '<div style="background:#fff;color:#000;max-width:520px;width:100%;padding:1rem;border-radius:8px;display:grid;gap:.6rem;"><b>إعداد المزامنة</b><label>رابط الخادم (ينتهي بـ /exec)<input id="sy-url" dir="ltr" style="width:100%"></label><label>كلمة السرّ<input id="sy-tok" dir="ltr" type="password" style="width:100%"></label><div id="sy-msg" style="min-height:1.2em;"></div><input id="sy-link" readonly dir="ltr" class="hidden" style="width:100%"><div style="display:flex;gap:.5rem;flex-wrap:wrap;"><button type="button" id="sy-test">اختبار وحفظ</button><button type="button" id="sy-mk">رابط إعداد للمعلمين</button><button type="button" id="sy-x">إغلاق</button></div></div>';
+      document.body.appendChild(w);
+      const $ = function (id) { return w.querySelector('#' + id); };
+      $('sy-url').value = c.url; $('sy-tok').value = c.token;
+      $('sy-x').onclick = function () { w.remove(); };
+      $('sy-test').onclick = async function () {
+        lsSet(SYNC_CFG_KEY, { url: $('sy-url').value.trim(), token: $('sy-tok').value.trim() });
+        $('sy-msg').textContent = 'جارٍ الاختبار…';
+        try { const r = await syncCall({ action: 'ping' }); $('sy-msg').textContent = r.ok ? 'تم الاتصال بنجاح ✔' : 'الخادم رفض الطلب: تحقق من كلمة السرّ.'; if (r.ok) syncNow(); }
+        catch (e) { $('sy-msg').textContent = 'تعذر الاتصال: تحقق من الرابط والإنترنت.'; }
+        syncStatus(syncLabel());
+      };
+      $('sy-mk').onclick = function () {
+        const cfg = syncCfg(); if (!cfg) { $('sy-msg').textContent = 'احفظ الإعداد أولاً.'; return; }
+        const l = $('sy-link'); l.classList.remove('hidden');
+        l.value = location.origin + location.pathname + '#sync=' + btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
+        l.select(); $('sy-msg').textContent = 'انسخ الرابط وأرسله للمعلم؛ يفتحه مرة واحدة فقط على جهازه.';
+      };
+    }
+    (function () {
+      const _set = setStudentAttendanceRecord, _enter = enterPostAuthStage;
+      window.setStudentAttendanceRecord = function (d, s, p, st, status) { const r = _set.apply(this, arguments); syncEnqueue(d, s, p, st, status); return r; };
+      window.enterPostAuthStage = function () { const r = _enter.apply(this, arguments); setTimeout(syncNow, 500); return r; };
+      window.addEventListener('online', syncNow);
+      window.addEventListener('offline', function () { syncStatus(syncLabel()); });
+      setInterval(syncNow, 30000);
+      window.addEventListener('DOMContentLoaded', function () {
+        const m = /#sync=([^&]+)/.exec(location.hash);
+        if (m) { try { lsSet(SYNC_CFG_KEY, JSON.parse(decodeURIComponent(escape(atob(m[1]))))); history.replaceState(null, '', location.pathname); } catch (e) {} }
+        syncStatus(syncLabel()); setTimeout(syncNow, 1500);
+      });
+    })();
+
+    document.addEventListener(`DOMContentLoaded`, initializeApp);
+  </script>
+</body>
+</html>
