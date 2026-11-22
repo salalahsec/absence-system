@@ -4054,15 +4054,22 @@
       appState.sections = []; appState.studentsBySection = {}; appState.teachers = []; appState.attendance = {};
       await persistAppState();
     }
-    function parseSetupCode(s) {
-      s = String(s || '').trim();
-      const m = /sync=([^&\s]+)/.exec(s); if (m) s = m[1];
+    function parseSetupCode(raw) {
+      let s = String(raw || '').trim();
+      const i = s.indexOf('sync=');
+      if (i >= 0) s = s.slice(i + 5);
+      else if (/^https?:/i.test(s) || s.indexOf('#') >= 0) throw new Error('nosync');
+      s = s.split('&')[0];
       try { s = decodeURIComponent(s); } catch (e) {}
-      s = s.replace(/\s/g, '').replace(/-/g, '+').replace(/_/g, '/');
-      while (s.length % 4) s += '=';
-      const c = JSON.parse(decodeURIComponent(escape(atob(s))));
-      if (!c || !c.url || !c.token) throw new Error('bad');
-      return c;
+      const tries = [s.replace(/\s/g, ''), s.replace(/\s/g, '+')];
+      for (let k = 0; k < tries.length; k++) {
+        try {
+          let b = tries[k].replace(/-/g, '+').replace(/_/g, '/'); while (b.length % 4) b += '=';
+          const c = JSON.parse(decodeURIComponent(escape(atob(b))));
+          if (c && c.url && c.token) return c;
+        } catch (e) {}
+      }
+      throw new Error('corrupt');
     }
     function openSetupPaste() {
       if (session && session.loggedIn) return;
@@ -4076,17 +4083,22 @@
           lsSet(SYNC_CFG_KEY, parseSetupCode(w.querySelector('#sp-in').value));
           if (!localStorage.getItem(SYNC_CFG_KEY)) { w.querySelector('#sp-msg').textContent = 'المتصفح لا يسمح بالحفظ (هل أنت في وضع التصفح الخاص؟).'; return; }
           syncStatus(syncLabel()); w.querySelector('#sp-msg').textContent = 'تم الحفظ ✔'; setTimeout(function () { w.remove(); syncNow(); }, 1200);
-        } catch (e) { w.querySelector('#sp-msg').textContent = 'الرابط غير صالح. انسخه كاملاً وأعد المحاولة.'; }
+        } catch (e) { w.querySelector('#sp-msg').textContent = e && e.message === 'nosync' ? 'لم أجد جزء الإعداد (sync=) في النص. انسخ رابط الإعداد الكامل من صفحة المشرف، وليس عنوان الصفحة فقط.' : 'النص ناقص أو مشوّه. انسخ الرابط من جديد من صفحة المشرف بعد تحديثها.'; }
       };
     }
     function openSyncSettings() {
       const c = syncCfg() || { url: '', token: '' };
       const w = document.createElement('div');
       w.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
-      w.innerHTML = '<div style="background:#fff;color:#000;max-width:520px;width:100%;padding:1rem;border-radius:8px;display:grid;gap:.6rem;"><b>إعداد المزامنة</b><label>رابط الخادم (ينتهي بـ /exec)<input id="sy-url" dir="ltr" style="width:100%"></label><label>كلمة السرّ<input id="sy-tok" dir="ltr" type="password" style="width:100%"></label><div id="sy-msg" style="min-height:1.2em;"></div><input id="sy-link" readonly dir="ltr" class="hidden" style="width:100%"><div style="display:flex;gap:.5rem;flex-wrap:wrap;"><button type="button" id="sy-test">اختبار وحفظ</button><button type="button" id="sy-mk">رابط إعداد للمعلمين</button><button type="button" id="sy-x">إغلاق</button></div></div>';
+      w.innerHTML = '<div style="background:#fff;color:#000;max-width:520px;width:100%;padding:1rem;border-radius:8px;display:grid;gap:.6rem;"><b>إعداد المزامنة</b><label>رابط الخادم (ينتهي بـ /exec)<input id="sy-url" dir="ltr" style="width:100%"></label><label>كلمة السرّ<input id="sy-tok" dir="ltr" type="password" style="width:100%"></label><div id="sy-msg" style="min-height:1.2em;"></div><input id="sy-link" readonly dir="ltr" class="hidden" style="width:100%"><div style="display:flex;gap:.5rem;flex-wrap:wrap;"><button type="button" id="sy-test">اختبار وحفظ</button><button type="button" id="sy-mk">رابط إعداد للمعلمين</button><button type="button" id="sy-cp">نسخ الرابط</button><button type="button" id="sy-x">إغلاق</button></div></div>';
       document.body.appendChild(w);
       const $ = function (id) { return w.querySelector('#' + id); };
       $('sy-url').value = c.url; $('sy-tok').value = c.token;
+      $('sy-cp').onclick = async function () {
+        const l = $('sy-link'); if (!l.value) { $('sy-msg').textContent = 'اضغط «رابط إعداد للمعلمين» أولاً.'; return; }
+        try { await navigator.clipboard.writeText(l.value); $('sy-msg').textContent = 'تم نسخ الرابط ✔'; }
+        catch (e) { l.classList.remove('hidden'); l.select(); try { document.execCommand('copy'); $('sy-msg').textContent = 'تم نسخ الرابط ✔'; } catch (e2) { $('sy-msg').textContent = 'حدّد الرابط وانسخه يدوياً.'; } }
+      };
       $('sy-x').onclick = function () { w.remove(); };
       $('sy-test').onclick = async function () {
         lsSet(SYNC_CFG_KEY, { url: $('sy-url').value.trim(), token: $('sy-tok').value.trim() });
@@ -4211,6 +4223,6 @@
 
     document.addEventListener(`DOMContentLoaded`, initializeApp);
   </script>
-<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (د)</div>
+<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (هـ)</div>
 </body>
 </html>
