@@ -1254,6 +1254,16 @@
     .header-controls .badge, .header-controls .user-chip, .header-controls .save-status-pill { font-size: 0.74rem; white-space: nowrap; }
     .numeral-toggle { font-size: 0.74rem; white-space: nowrap; }
     .numeral-btn { padding: 0.2rem 0.45rem; font-size: 0.74rem; white-space: nowrap; }
+      /* Mobile layout fixes */
+    .role-option-btn { white-space: normal; line-height: 1.25; min-width: 0; }
+    .role-selector { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 720px) {
+      .header-controls { flex-wrap: wrap; overflow: visible; width: 100%; }
+      .header-controls > * { flex: 0 1 auto; }
+      .numeral-toggle { flex-wrap: wrap; }
+      .brand-titles h1 { font-size: 1.05rem; line-height: 1.35; }
+      .brand-subtitle { font-size: 0.8rem; }
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
