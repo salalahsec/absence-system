@@ -1246,6 +1246,14 @@
   
     :root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
     html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+      /* Header buttons: one compact row */
+    .header-controls { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; gap: 0.35rem; scrollbar-width: thin; }
+    .header-controls > * { flex: 0 0 auto; }
+    .header-controls .btn { padding: 0.3rem 0.6rem; font-size: 0.78rem; line-height: 1.2; white-space: nowrap; min-height: 0; }
+    .header-controls .btn svg { width: 13px; height: 13px; }
+    .header-controls .badge, .header-controls .user-chip, .header-controls .save-status-pill { font-size: 0.74rem; white-space: nowrap; }
+    .numeral-toggle { font-size: 0.74rem; white-space: nowrap; }
+    .numeral-btn { padding: 0.2rem 0.45rem; font-size: 0.74rem; white-space: nowrap; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
