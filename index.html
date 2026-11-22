@@ -4083,7 +4083,7 @@
           lsSet(SYNC_CFG_KEY, parseSetupCode(w.querySelector('#sp-in').value));
           if (!localStorage.getItem(SYNC_CFG_KEY)) { w.querySelector('#sp-msg').textContent = 'المتصفح لا يسمح بالحفظ (هل أنت في وضع التصفح الخاص؟).'; return; }
           syncStatus(syncLabel()); w.querySelector('#sp-msg').textContent = 'تم الحفظ ✔'; setTimeout(function () { w.remove(); syncNow(); }, 1200);
-        } catch (e) { w.querySelector('#sp-msg').textContent = e && e.message === 'nosync' ? 'لم أجد جزء الإعداد (sync=) في النص. انسخ رابط الإعداد الكامل من صفحة المشرف، وليس عنوان الصفحة فقط.' : 'النص ناقص أو مشوّه. انسخ الرابط من جديد من صفحة المشرف بعد تحديثها.'; }
+        } catch (e) { w.querySelector('#sp-msg').textContent = e && e.message === 'nosync' ? 'لم أجد جزء الإعداد (sync=) في النص. انسخ رابط الإعداد الكامل من صفحة المشرف، وليس عنوان الصفحة فقط.' : 'النص ناقص أو مشوّه. انسخ الرابط من جديد من صفحة المشرف بعد تحديثها. (طول النص: ' + w.querySelector('#sp-in').value.length + ')'; }
       };
     }
     function openSyncSettings() {
@@ -4223,6 +4223,6 @@
 
     document.addEventListener(`DOMContentLoaded`, initializeApp);
   </script>
-<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (هـ)</div>
+<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (و)</div>
 </body>
 </html>
