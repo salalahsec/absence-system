@@ -4074,7 +4074,8 @@
       w.querySelector('#sp-ok').onclick = function () {
         try {
           lsSet(SYNC_CFG_KEY, parseSetupCode(w.querySelector('#sp-in').value));
-          syncStatus(syncLabel()); w.remove(); syncNow();
+          if (!localStorage.getItem(SYNC_CFG_KEY)) { w.querySelector('#sp-msg').textContent = 'المتصفح لا يسمح بالحفظ (هل أنت في وضع التصفح الخاص؟).'; return; }
+          syncStatus(syncLabel()); w.querySelector('#sp-msg').textContent = 'تم الحفظ ✔'; setTimeout(function () { w.remove(); syncNow(); }, 1200);
         } catch (e) { w.querySelector('#sp-msg').textContent = 'الرابط غير صالح. انسخه كاملاً وأعد المحاولة.'; }
       };
     }
@@ -4210,5 +4211,6 @@
 
     document.addEventListener(`DOMContentLoaded`, initializeApp);
   </script>
+<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (د)</div>
 </body>
 </html>
