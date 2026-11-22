@@ -1300,7 +1300,7 @@
           <span id="header-user-role" class="badge badge-gold"></span>
         </div>
 
-        <span id="sync-status" class="badge badge-gold">المزامنة: غير مفعلة</span>
+        <span id="sync-status" class="badge badge-gold" style="cursor:pointer" onclick="openSetupPaste()" title="اضغط للصق رابط الإعداد">المزامنة: غير مفعلة</span>
           <button type="button" id="btn-admin" class="btn btn-ghost-light hidden" onclick="openAdminSettings()">إعدادات المشرف</button>
           <button type="button" id="btn-sync" class="btn btn-ghost-light hidden" onclick="openSyncSettings()">المزامنة</button>
           <button type="button" id="btn-backup" class="btn btn-ghost-light hidden" onclick="backupNow(true)">نسخة احتياطية</button>
@@ -4054,6 +4054,30 @@
       appState.sections = []; appState.studentsBySection = {}; appState.teachers = []; appState.attendance = {};
       await persistAppState();
     }
+    function parseSetupCode(s) {
+      s = String(s || '').trim();
+      const m = /sync=([^&\s]+)/.exec(s); if (m) s = m[1];
+      try { s = decodeURIComponent(s); } catch (e) {}
+      s = s.replace(/\s/g, '').replace(/-/g, '+').replace(/_/g, '/');
+      while (s.length % 4) s += '=';
+      const c = JSON.parse(decodeURIComponent(escape(atob(s))));
+      if (!c || !c.url || !c.token) throw new Error('bad');
+      return c;
+    }
+    function openSetupPaste() {
+      if (session && session.loggedIn) return;
+      const w = document.createElement('div');
+      w.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+      w.innerHTML = '<div style="background:#fff;color:#000;max-width:520px;width:100%;padding:1rem;border-radius:8px;display:grid;gap:.6rem;"><b>إعداد المزامنة</b><label>الصق رابط الإعداد الذي أرسله المشرف<textarea id="sp-in" dir="ltr" rows="4" style="width:100%"></textarea></label><div id="sp-msg" style="min-height:1.2em;"></div><div style="display:flex;gap:.5rem;"><button type="button" id="sp-ok">حفظ</button><button type="button" id="sp-x">إغلاق</button></div></div>';
+      document.body.appendChild(w);
+      w.querySelector('#sp-x').onclick = function () { w.remove(); };
+      w.querySelector('#sp-ok').onclick = function () {
+        try {
+          lsSet(SYNC_CFG_KEY, parseSetupCode(w.querySelector('#sp-in').value));
+          syncStatus(syncLabel()); w.remove(); syncNow();
+        } catch (e) { w.querySelector('#sp-msg').textContent = 'الرابط غير صالح. انسخه كاملاً وأعد المحاولة.'; }
+      };
+    }
     function openSyncSettings() {
       const c = syncCfg() || { url: '', token: '' };
       const w = document.createElement('div');
@@ -4073,7 +4097,7 @@
       $('sy-mk').onclick = function () {
         const cfg = syncCfg(); if (!cfg) { $('sy-msg').textContent = 'احفظ الإعداد أولاً.'; return; }
         const l = $('sy-link'); l.classList.remove('hidden');
-        l.value = location.origin + location.pathname + '#sync=' + btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
+        l.value = location.origin + location.pathname + '#sync=' + btoa(unescape(encodeURIComponent(JSON.stringify(cfg)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
         l.select(); $('sy-msg').textContent = 'انسخ الرابط وأرسله للمعلم؛ يفتحه مرة واحدة فقط على جهازه.';
       };
     }
@@ -4179,7 +4203,7 @@
       setInterval(syncNow, 30000);
       window.addEventListener('DOMContentLoaded', function () {
         const m = /#sync=([^&]+)/.exec(location.hash);
-        if (m) { try { lsSet(SYNC_CFG_KEY, JSON.parse(decodeURIComponent(escape(atob(m[1]))))); history.replaceState(null, '', location.pathname); } catch (e) {} }
+        if (m) { try { lsSet(SYNC_CFG_KEY, parseSetupCode(m[1])); history.replaceState(null, '', location.pathname); } catch (e) {} }
         syncStatus(syncLabel()); setTimeout(syncNow, 1500);
       });
     })();
