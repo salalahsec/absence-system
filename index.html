@@ -3012,14 +3012,22 @@
         try {
           const wb = XLSX.read(fr.result, { type: 'array' });
           const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
-          let added = 0, skipped = 0, n = 0;
+          let added = 0, skipped = 0, updated = 0, n = 0;
           rows.forEach(function (r, idx) {
             const name = String(r[1] || '').trim(), subj = String(r[2] || '').trim();
             if (!name || (idx === 0 && name.indexOf('الاسم') >= 0)) return;
             n++;
-            if (appState.teachers.some(function (x) { return x.fullName === name; })) { skipped++; return; }
-            if (subj && appState.subjects.indexOf(subj) < 0) appState.subjects.push(subj);
             const serial = parseInt(r[0], 10) || n;
+            if (subj && appState.subjects.indexOf(subj) < 0) appState.subjects.push(subj);
+            const old = appState.teachers.find(function (x) { return x.fullName === name; });
+            if (old) {
+              if (old.username) { skipped++; return; }
+              old.username = uniqueUsername(String(r[3] || '').trim() || ('t' + String(serial).padStart(2, '0')));
+              old.password = String(r[4] || '').trim() || genPassword();
+              old.mustForceChange = true; old.active = true; delete old.imported;
+              if (subj && (!old.subject || old.subject === 'غير محدد')) old.subject = subj;
+              updated++; return;
+            }
             const user = uniqueUsername(String(r[3] || '').trim() || ('t' + String(serial).padStart(2, '0')));
             const pass = String(r[4] || '').trim() || genPassword();
             appState.teachers.push({ id: 't-' + Date.now() + '-' + idx, username: user, password: pass, fullName: name, subject: subj || 'غير محدد', sections: [], mustForceChange: true, active: true });
@@ -3027,8 +3035,8 @@
           });
           document.getElementById('teachers-xlsx-input').value = '';
           await persistAppState();
-          showTeachersFeedback('تم استيراد ' + fmtNum(added) + ' معلم' + (skipped ? ' (تخطي ' + fmtNum(skipped) + ' مكرر)' : '') + ' مع توليد بيانات الدخول. صدّرها بزر «تصدير بيانات الدخول» ثم أسند الشعب من «تعديل».', false);
           renderTeachersManagementTab();
+          showTeachersFeedback('أُضيف ' + fmtNum(added) + ' معلم، وحُدّثت بيانات دخول ' + fmtNum(updated) + ' معلم موجود، وتُخطّي ' + fmtNum(skipped) + ' لديه بيانات دخول مسبقاً. صدّر بيانات الدخول ثم أسند الشعب من «تعديل».', false);
         } catch (e) { showTeachersFeedback('تعذر قراءة الملف. تأكد أنه بصيغة xlsx.', true); }
       };
       fr.readAsArrayBuffer(f);
