@@ -1635,8 +1635,8 @@
               <div id="subjects-chips" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.6rem;"></div>
               <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem;"><input type="text" id="new-subject-input" class="input-control" placeholder="تخصص جديد" style="max-width:240px"><button type="button" class="btn btn-primary btn-sm" onclick="addSubject()">إضافة تخصص</button></div>
               <h3 style="margin:0 0 var(--space-sm);color:var(--primary);">استيراد المعلمين من Excel</h3>
-              <p class="field-label" style="margin:0 0 .4rem;">أعمدة الملف بالترتيب: <b>المسلسل | الاسم | التخصص</b>. بعد الاستيراد حدّد لكل معلم اسم الدخول وكلمة المرور والشعب من زر «تعديل».</p>
-              <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.8rem;"><input type="file" id="teachers-xlsx-input" accept=".xlsx,.xls" class="input-control" style="max-width:280px"><button type="button" class="btn btn-primary btn-sm" onclick="importTeachersXlsx()">استيراد</button><button type="button" class="btn btn-gold-outline btn-sm" onclick="downloadTeachersTemplate()">تنزيل نموذج</button></div>
+              <p class="field-label" style="margin:0 0 .4rem;">أعمدة الملف بالترتيب: <b>المسلسل | الاسم | التخصص | اسم الدخول | كلمة المرور</b>. اترك العمودين الأخيرين فارغين ليولّدهما النظام. بعد الاستيراد أسند الشعب من زر «تعديل».</p>
+              <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.8rem;"><input type="file" id="teachers-xlsx-input" accept=".xlsx,.xls" class="input-control" style="max-width:280px"><button type="button" class="btn btn-primary btn-sm" onclick="importTeachersXlsx()">استيراد</button><button type="button" class="btn btn-gold-outline btn-sm" onclick="downloadTeachersTemplate()">تنزيل نموذج</button><button type="button" class="btn btn-secondary btn-sm" onclick="exportTeacherCredentials()">تصدير بيانات الدخول (Excel)</button><button type="button" class="btn btn-gold-outline btn-sm" onclick="printTeacherCards()">طباعة بطاقات الدخول</button></div>
               <h3 style="margin:0 0 var(--space-sm);color:var(--primary);">تقرير المعلمين</h3>
               <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;"><select id="report-subject-select" class="select-control" style="max-width:240px"></select><button type="button" class="btn btn-secondary btn-sm" onclick="showTeacherReport()">عرض</button><button type="button" class="btn btn-gold-outline btn-sm" onclick="exportTeacherReport()">تصدير CSV</button></div>
               <div id="teacher-report-box" class="table-scroll" style="margin-top:.6rem;"></div>
@@ -2989,9 +2989,19 @@
       document.getElementById('add-teacher-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     function downloadTeachersTemplate() {
-      const ws = XLSX.utils.aoa_to_sheet([['المسلسل','الاسم','التخصص'],[1,'اسم المعلم (مثال)','الرياضيات']]);
+      const ws = XLSX.utils.aoa_to_sheet([['المسلسل','الاسم','التخصص','اسم الدخول','كلمة المرور'],[1,'اسم المعلم (مثال)','الرياضيات','','']]);
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'المعلمون');
       window.notebookAppApi.triggerFileDownload({ content: XLSX.write(wb, { type: 'array', bookType: 'xlsx' }), filename: 'teachers_template.xlsx' });
+    }
+    function genPassword() {
+      const ch = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', a = new Uint32Array(6); crypto.getRandomValues(a);
+      return Array.from(a).map(function (n) { return ch[n % ch.length]; }).join('');
+    }
+    function uniqueUsername(base) {
+      let u = base, k = 2;
+      const taken = function (x) { return appState.teachers.some(function (t) { return (t.username || '').toLowerCase() === x.toLowerCase(); }); };
+      while (taken(u)) u = base + '_' + (k++);
+      return u;
     }
     function importTeachersXlsx() {
       const f = document.getElementById('teachers-xlsx-input').files[0];
@@ -3002,22 +3012,58 @@
         try {
           const wb = XLSX.read(fr.result, { type: 'array' });
           const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
-          let added = 0, skipped = 0;
+          let added = 0, skipped = 0, n = 0;
           rows.forEach(function (r, idx) {
             const name = String(r[1] || '').trim(), subj = String(r[2] || '').trim();
             if (!name || (idx === 0 && name.indexOf('الاسم') >= 0)) return;
+            n++;
             if (appState.teachers.some(function (x) { return x.fullName === name; })) { skipped++; return; }
             if (subj && appState.subjects.indexOf(subj) < 0) appState.subjects.push(subj);
-            appState.teachers.push({ id: 't-' + Date.now() + '-' + idx, username: '', password: '12345', fullName: name, subject: subj || 'غير محدد', sections: [], mustForceChange: true, active: false, imported: true });
+            const serial = parseInt(r[0], 10) || n;
+            const user = uniqueUsername(String(r[3] || '').trim() || ('t' + String(serial).padStart(2, '0')));
+            const pass = String(r[4] || '').trim() || genPassword();
+            appState.teachers.push({ id: 't-' + Date.now() + '-' + idx, username: user, password: pass, fullName: name, subject: subj || 'غير محدد', sections: [], mustForceChange: true, active: true });
             added++;
           });
           document.getElementById('teachers-xlsx-input').value = '';
           await persistAppState();
-          showTeachersFeedback('تم استيراد ' + fmtNum(added) + ' معلم' + (skipped ? ' (تخطي ' + fmtNum(skipped) + ' مكرر)' : '') + '. حدّد اسم الدخول وكلمة المرور والشعب لكل معلم من زر «تعديل».', false);
+          showTeachersFeedback('تم استيراد ' + fmtNum(added) + ' معلم' + (skipped ? ' (تخطي ' + fmtNum(skipped) + ' مكرر)' : '') + ' مع توليد بيانات الدخول. صدّرها بزر «تصدير بيانات الدخول» ثم أسند الشعب من «تعديل».', false);
           renderTeachersManagementTab();
         } catch (e) { showTeachersFeedback('تعذر قراءة الملف. تأكد أنه بصيغة xlsx.', true); }
       };
       fr.readAsArrayBuffer(f);
+    }
+    function pendingCredentials() { return appState.teachers.filter(function (x) { return x.mustForceChange && x.username; }); }
+    async function exportTeacherCredentials() {
+      const list = pendingCredentials();
+      if (!list.length) { showTeachersFeedback('لا توجد بيانات دخول ابتدائية لم تُغيَّر بعد.', true); return; }
+      if (typeof XLSX === 'undefined') { showTeachersFeedback('تعذر تحميل مكتبة Excel. تحقق من الاتصال بالإنترنت.', true); return; }
+      const rows = [['م', 'المعلم', 'التخصص', 'اسم الدخول', 'كلمة المرور الابتدائية']].concat(list.map(function (x, i) { return [i + 1, x.fullName, x.subject, x.username, x.password]; }));
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [{ wch: 5 }, { wch: 40 }, { wch: 28 }, { wch: 18 }, { wch: 24 }];
+      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'بيانات الدخول');
+      wb.Workbook = { Views: [{ RTL: true }] };
+      await saveFileSmart('teachers_credentials.xlsx', XLSX.write(wb, { type: 'array', bookType: 'xlsx' }), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    }
+    function printTeacherCards() {
+      const list = pendingCredentials();
+      if (!list.length) { showTeachersFeedback('لا توجد بيانات دخول ابتدائية لم تُغيَّر بعد.', true); return; }
+      const url = location.origin + location.pathname;
+      const cards = list.map(function (x) {
+        return '<div class="c"><div class="n">' + escapeHtml(x.fullName) + '</div><div class="s">' + escapeHtml(x.subject) + '</div>' +
+          '<div class="r"><span>اسم الدخول</span><b dir="ltr">' + escapeHtml(x.username) + '</b></div>' +
+          '<div class="r"><span>كلمة المرور</span><b dir="ltr">' + escapeHtml(x.password) + '</b></div>' +
+          '<div class="u" dir="ltr">' + escapeHtml(url) + '</div><div class="h">غيّر كلمة المرور عند أول دخول</div></div>';
+      }).join('');
+      const w = window.open('', '_blank');
+      if (!w) { showTeachersFeedback('منع المتصفح نافذة الطباعة. اسمح بالنوافذ المنبثقة لهذه الصفحة ثم أعد المحاولة.', true); return; }
+      w.document.write('<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>بطاقات الدخول</title><style>' +
+        'body{font-family:Tahoma,Arial,sans-serif;margin:10mm;} .g{display:grid;grid-template-columns:1fr 1fr;gap:6mm;}' +
+        '.c{border:1.5px dashed #555;border-radius:4mm;padding:4mm;break-inside:avoid;} .n{font-weight:700;font-size:13pt;} .s{color:#555;font-size:10pt;margin-bottom:2mm;}' +
+        '.r{display:flex;justify-content:space-between;border-top:1px solid #ddd;padding:1.5mm 0;font-size:11pt;} .r b{font-size:13pt;letter-spacing:1px;}' +
+        '.u{font-size:8pt;color:#444;margin-top:2mm;word-break:break-all;} .h{font-size:9pt;color:#a00;margin-top:1mm;}' +
+        '@media print{body{margin:6mm;}}</style></head><body><div class="g">' + cards + '</div></body></html>');
+      w.document.close(); setTimeout(function () { w.focus(); w.print(); }, 400);
     }
 
     function teacherReportRows() {
