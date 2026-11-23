@@ -4056,20 +4056,22 @@
     }
     function parseSetupCode(raw) {
       let s = String(raw || '').replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, '').trim();
-      const i = s.indexOf('sync=');
+      try { s = decodeURIComponent(s); } catch (e) {}
+      const i = s.lastIndexOf('sync=');
       if (i >= 0) s = s.slice(i + 5);
       else if (/^https?:/i.test(s) || s.indexOf('#') >= 0) throw new Error('nosync');
-      s = s.split('&')[0];
       try { s = decodeURIComponent(s); } catch (e) {}
-      const tries = [s.replace(/\s/g, ''), s.replace(/\s/g, '+')];
-      for (let k = 0; k < tries.length; k++) {
-        try {
-          let b = tries[k].replace(/-/g, '+').replace(/_/g, '/').replace(/[^A-Za-z0-9+\/=]/g, ''); while (b.length % 4) b += '=';
-          const c = JSON.parse(decodeURIComponent(escape(atob(b))));
-          if (c && c.url && c.token) return c;
-        } catch (e) {}
+      const base = s.replace(/\s/g, '').replace(/[^A-Za-z0-9+\/=_-]/g, '').replace(/-/g, '+').replace(/_/g, '/').replace(/=+/g, '');
+      let stage = 'base64';
+      for (let cut = 0; cut <= 60 && cut < base.length; cut++) {
+        let b = base.slice(0, base.length - cut);
+        if (b.length % 4 === 1) continue;
+        while (b.length % 4) b += '=';
+        let txt; try { txt = decodeURIComponent(escape(atob(b))); } catch (e) { continue; }
+        stage = 'json';
+        try { const c = JSON.parse(txt); if (c && c.url && c.token) return c; stage = 'keys'; } catch (e) {}
       }
-      throw new Error('corrupt');
+      const err = new Error('corrupt'); err.stage = stage; err.len = base.length; throw err;
     }
     function openSetupPaste() {
       if (session && session.loggedIn) return;
@@ -4083,7 +4085,7 @@
           lsSet(SYNC_CFG_KEY, parseSetupCode(w.querySelector('#sp-in').value));
           if (!localStorage.getItem(SYNC_CFG_KEY)) { w.querySelector('#sp-msg').textContent = 'المتصفح لا يسمح بالحفظ (هل أنت في وضع التصفح الخاص؟).'; return; }
           syncStatus(syncLabel()); w.querySelector('#sp-msg').textContent = 'تم الحفظ ✔'; setTimeout(function () { w.remove(); syncNow(); }, 1200);
-        } catch (e) { w.querySelector('#sp-msg').textContent = e && e.message === 'nosync' ? 'لم أجد جزء الإعداد (sync=) في النص. انسخ رابط الإعداد الكامل من صفحة المشرف، وليس عنوان الصفحة فقط.' : 'النص ناقص أو مشوّه. انسخ الرابط من جديد من صفحة المشرف بعد تحديثها. (طول النص: ' + w.querySelector('#sp-in').value.length + ')'; }
+        } catch (e) { w.querySelector('#sp-msg').textContent = e && e.message === 'nosync' ? 'لم أجد جزء الإعداد (sync=) في النص. انسخ رابط الإعداد الكامل من صفحة المشرف، وليس عنوان الصفحة فقط.' : 'النص ناقص أو مشوّه. (المرحلة: ' + (e && e.stage || '?') + '، طول الرمز: ' + (e && e.len || 0) + '، طول النص: ' + w.querySelector('#sp-in').value.length + ')'; }
       };
     }
     function openSyncSettings() {
@@ -4223,6 +4225,6 @@
 
     document.addEventListener(`DOMContentLoaded`, initializeApp);
   </script>
-<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (ز)</div>
+<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (ح)</div>
 </body>
 </html>
