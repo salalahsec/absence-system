@@ -3972,7 +3972,8 @@
     function syncStatus(txt) { const el = document.getElementById('sync-status'); if (el) el.textContent = txt; }
     async function syncCall(body) {
       const c = syncCfg();
-      const r = await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ token: c.token }, teacherAuth ? { auth: teacherAuth } : {}, body)) });
+      const ctl = new AbortController(), tm = setTimeout(function () { ctl.abort(); }, 25000);
+      let r; try { r = await fetch(c.url, { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ token: c.token }, teacherAuth ? { auth: teacherAuth } : {}, body)) }); } finally { clearTimeout(tm); }
       return r.json();
     }
     function syncSoon() { clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 1500); }
@@ -4037,8 +4038,8 @@
       if (!user || !pass) { show('أدخل اسم الدخول وكلمة المرور.'); return; }
       let r;
       try { teacherAuth = { username: user, password: pass }; r = await syncCall({ action: 'teacherLogin' }); }
-      catch (e) { teacherAuth = null; show('تعذر الاتصال بالخادم. تحقق من الإنترنت ثم أعد المحاولة.'); return; }
-      if (!r || !r.ok) { teacherAuth = null; show(r && r.error === 'locked' ? 'محاولات خاطئة كثيرة. حاول بعد عشر دقائق.' : 'اسم الدخول أو كلمة المرور غير صحيحة.'); return; }
+      catch (e) { teacherAuth = null; show('تعذر الاتصال بالخادم. تحقق من الإنترنت ثم أعد المحاولة. (' + (e && e.name || '?') + ': ' + (e && e.message || '?') + ')'); return; }
+      if (!r || !r.ok) { teacherAuth = null; show(r && r.error === 'locked' ? 'محاولات خاطئة كثيرة. حاول بعد عشر دقائق.' : (r && r.error === 'unauthorized' ? 'رمز المزامنة المحفوظ في هذا الجهاز قديم أو غير صحيح. اضغط عبارة «المزامنة» في الأعلى وأدخل الرمز الجديد.' : 'اسم الدخول أو كلمة المرور غير صحيحة.')); return; }
       const tc = Object.assign({}, r.teacher, { password: pass, active: true });
       appState.sections = r.sections || []; appState.studentsBySection = r.students || {};
       appState.teachers = [tc]; appState.attendance = {}; appState.subjects = [tc.subject];
@@ -4088,7 +4089,7 @@
         const r = await syncCall({ action: 'ping' });
         if (r && r.ok) { msgEl.textContent = 'الرمز صحيح ✔'; syncStatus(syncLabel()); return true; }
         restore(); msgEl.textContent = 'الرمز غير صحيح. تأكد منه وأعد المحاولة.'; return false;
-      } catch (e) { restore(); msgEl.textContent = 'تعذر الاتصال بالخادم. تحقق من الإنترنت.'; return false; }
+      } catch (e) { restore(); msgEl.textContent = 'تعذر الاتصال بالخادم. تحقق من الإنترنت. (' + (e && e.name || '?') + ': ' + (e && e.message || '?') + ')'; return false; }
     }
     function openSetupPaste(isSup) {
       if (!isSup && session && session.loggedIn) return;
@@ -4161,6 +4162,7 @@
       try {
         const r = await syncCall({ action: 'adminLogin', admin: pass });
         reached = true; ok = !!(r && r.ok);
+        if (r && r.error === 'unauthorized') { show('رمز المزامنة المحفوظ في هذا الجهاز قديم أو غير صحيح. اضغط عبارة «المزامنة» في أعلى الصفحة وأدخل الرمز الجديد، ثم أعد المحاولة.'); return; }
         if (r && r.error === 'locked') { show('محاولات خاطئة كثيرة. حاول بعد عشر دقائق.'); return; }
       } catch (e) {}
       if (!ok && !reached && localStorage.getItem(ADMIN_KEY) && pass === appState.supervisor.password) ok = true;
@@ -4213,6 +4215,6 @@
 
     document.addEventListener(`DOMContentLoaded`, initializeApp);
   </script>
-<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (ط)</div>
+<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (ك)</div>
 </body>
 </html>
