@@ -2141,7 +2141,7 @@
         return;
       }
 
-      if (syncCfg() && !localStorage.getItem(ADMIN_KEY)) { teacherServerLogin(rawUser, rawPass, errEl); return; }
+      if (syncCfg() && !admKey()) { teacherServerLogin(rawUser, rawPass, errEl); return; }
       // Teacher authentication (case-insensitive username match)
       const teacher = appState.teachers.find(function (t) {
         return t.username && t.username.toLowerCase() === rawUser.toLowerCase();
@@ -3960,8 +3960,18 @@
     const SYNC_URL = 'https://script.google.com/macros/s/AKfycbwgHGXfZhJWtH6_WUkU8fQgFfsNz13Vk63bpHik-Kif0MHG3Y1-xZw8bgOSo3zzo1LVIw/exec';
     const SYNC_CFG_KEY = 'salalah-sync-config', SYNC_Q_KEY = 'salalah-sync-queue', SYNC_T_KEY = 'salalah-sync-times', SYNC_P_KEY = 'salalah-sync-pull';
     let syncApplying = false, syncBusy = false, syncTimer = null, teacherAuth = null, teacherPull = false;
-    function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
-    function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    // Safe storage helpers: fall back to memory when the browser blocks localStorage.
+    const memStore = {};
+    function lsGet(k, d) {
+      try { const v = localStorage.getItem(k); if (v !== null) return JSON.parse(v); } catch (e) {}
+      return Object.prototype.hasOwnProperty.call(memStore, k) ? memStore[k] : d;
+    }
+    function lsSet(k, v) { memStore[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    function lsDel(k) { delete memStore[k]; try { localStorage.removeItem(k); } catch (e) {} }
+    function storageOk() { try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); return true; } catch (e) { return false; } }
+    function admKey() { try { const v = admKey(); if (v) return v; } catch (e) {} return memStore[ADMIN_KEY] || null; }
+    function admSet(v) { memStore[ADMIN_KEY] = v; try { localStorage.setItem(ADMIN_KEY, v); } catch (e) {} }
+    function admDel() { delete memStore[ADMIN_KEY]; try { localStorage.removeItem(ADMIN_KEY); } catch (e) {} }
     function syncCfg() { const c = lsGet(SYNC_CFG_KEY, null); return c && c.token ? { url: SYNC_URL, token: c.token } : null; }
     function syncLabel() {
       if (!syncCfg()) return 'المزامنة: غير مفعلة';
@@ -3997,11 +4007,11 @@
       lsSet(SYNC_T_KEY, tm); return changed;
     }
     async function syncNow() {
-      const isAdmin = !!localStorage.getItem(ADMIN_KEY) && !teacherAuth;
+      const isAdmin = !!admKey() && !teacherAuth;
       if (syncBusy || !syncCfg() || !navigator.onLine) { syncStatus(syncLabel()); return; }
       if (!isAdmin && !teacherAuth) { syncStatus('سجّل الدخول لإرسال التسجيلات'); return; }
       syncBusy = true; syncStatus('جارٍ المزامنة…');
-      const ex = isAdmin ? { admin: localStorage.getItem(ADMIN_KEY) } : {};
+      const ex = isAdmin ? { admin: admKey() } : {};
       try {
         const myId = teacherAuth && appState.teachers[0] ? appState.teachers[0].id : null;
         const q = lsGet(SYNC_Q_KEY, []).filter(function (x) { return !teacherAuth || x.teacherId === myId; });
@@ -4082,12 +4092,12 @@
       catch (e) { msgEl.textContent = 'النص غير صالح.'; return false; }
       if (!cfg.token) { msgEl.textContent = 'اكتب الرمز أولاً.'; return false; }
       const prev = lsGet(SYNC_CFG_KEY, null);
-      const restore = function () { if (prev) lsSet(SYNC_CFG_KEY, prev); else { try { localStorage.removeItem(SYNC_CFG_KEY); } catch (e2) {} } };
+      const restore = function () { if (prev) lsSet(SYNC_CFG_KEY, prev); else lsDel(SYNC_CFG_KEY); };
       lsSet(SYNC_CFG_KEY, { token: cfg.token });
       msgEl.textContent = 'جارٍ التحقق…';
       try {
         const r = await syncCall({ action: 'ping' });
-        if (r && r.ok) { msgEl.textContent = 'الرمز صحيح ✔'; syncStatus(syncLabel()); return true; }
+        if (r && r.ok) { msgEl.textContent = 'الرمز صحيح ✔' + (storageOk() ? '' : ' — تنبيه: هذا المتصفح لا يحفظ البيانات، وسيُطلب الرمز مجدداً بعد إغلاق الصفحة. جرّب تبويباً عادياً.'); syncStatus(syncLabel()); return true; }
         restore(); msgEl.textContent = 'الرمز غير صحيح. تأكد منه وأعد المحاولة.'; return false;
       } catch (e) { restore(); msgEl.textContent = 'تعذر الاتصال بالخادم. تحقق من الإنترنت. (' + (e && e.name || '?') + ': ' + (e && e.message || '?') + ')'; return false; }
     }
@@ -4119,15 +4129,15 @@
         const sig = pwSig(tc), m = map[tc.id];
         if (!m) { map[tc.id] = { sig: sig, at: 0 }; continue; }
         if (m.sig !== sig) {
-          const r = await syncCall({ action: 'setPw', admin: localStorage.getItem(ADMIN_KEY), teacherId: tc.id, password: tc.password, mustForceChange: !!tc.mustForceChange, pwAt: now });
+          const r = await syncCall({ action: 'setPw', admin: admKey(), teacherId: tc.id, password: tc.password, mustForceChange: !!tc.mustForceChange, pwAt: now });
           if (!r.ok) throw new Error('setPw');
           map[tc.id] = { sig: sig, at: now };
         }
       }
       // 2) school data: pull or push
-      const g = await syncCall({ action: 'adminGetConfig', admin: localStorage.getItem(ADMIN_KEY) });
+      const g = await syncCall({ action: 'adminGetConfig', admin: admKey() });
       if (!g.ok) throw new Error('getConfig');
-      const ver = lsGet(CFG_VER_KEY, 0), hasAdmin = !!localStorage.getItem(ADMIN_KEY);
+      const ver = lsGet(CFG_VER_KEY, 0), hasAdmin = !!admKey();
       const sig = JSON.stringify(cfgPayload()), dirty = sig !== lsGet(CFG_SIG_KEY, '');
       if (g.config && Number(g.version) > ver && !(dirty && ver > 0 && hasAdmin)) {
         appState.sections = g.config.sections || [];
@@ -4139,7 +4149,7 @@
         appState.teachers.forEach(function (tc) { map[tc.id] = { sig: pwSig(tc), at: (map[tc.id] && map[tc.id].at) || 0 }; });
         lsSet(CFG_VER_KEY, Number(g.version)); changed = true;
       } else if (dirty && hasAdmin && (ver > 0 || !g.config)) {
-        const r = await syncCall({ action: 'putConfig', admin: localStorage.getItem(ADMIN_KEY), config: cfgPayload() });
+        const r = await syncCall({ action: 'putConfig', admin: admKey(), config: cfgPayload() });
         if (!r.ok) throw new Error(r.error === 'admin_required' ? 'admin' : 'putConfig');
         lsSet(CFG_VER_KEY, Number(r.version)); lsSet(CFG_SIG_KEY, sig);
       }
@@ -4165,10 +4175,10 @@
         if (r && r.error === 'unauthorized') { show('رمز المزامنة المحفوظ في هذا الجهاز قديم أو غير صحيح. اضغط عبارة «المزامنة» في أعلى الصفحة وأدخل الرمز الجديد، ثم أعد المحاولة.'); return; }
         if (r && r.error === 'locked') { show('محاولات خاطئة كثيرة. حاول بعد عشر دقائق.'); return; }
       } catch (e) {}
-      if (!ok && !reached && localStorage.getItem(ADMIN_KEY) && pass === appState.supervisor.password) ok = true;
+      if (!ok && !reached && admKey() && pass === appState.supervisor.password) ok = true;
       if (!ok) { show(reached ? 'كلمة مرور المشرف غير صحيحة.' : 'تعذر الاتصال بالخادم. تحقق من الإنترنت.'); return; }
       if (reached) {
-        try { localStorage.setItem(ADMIN_KEY, pass); } catch (e) {}
+        admSet(pass);
         appState.supervisor.password = pass; appState.supervisor.mustForceChange = false;
         await persistAppState();
       }
@@ -4187,14 +4197,14 @@
         '<div id="ad-msg" style="min-height:1.2em;"></div><div style="display:flex;gap:.5rem;"><button type="button" id="ad-save">حفظ</button><button type="button" id="ad-x">إغلاق</button></div></div>';
       document.body.appendChild(w);
       const $ = function (id) { return w.querySelector('#' + id); };
-      $('ad-name').value = sv.fullName || ''; $('ad-user').value = sv.username || ''; $('ad-secret').value = localStorage.getItem(ADMIN_KEY) || '';
+      $('ad-name').value = sv.fullName || ''; $('ad-user').value = sv.username || ''; $('ad-secret').value = admKey() || '';
       $('ad-x').onclick = function () { w.remove(); };
       $('ad-save').onclick = async function () {
         const u = $('ad-user').value.trim(); if (!u) { $('ad-msg').textContent = 'اسم الدخول مطلوب.'; return; }
         sv.fullName = $('ad-name').value.trim() || sv.fullName; sv.username = u;
         if ($('ad-pass').value) { sv.password = $('ad-pass').value; sv.mustForceChange = false; }
         const sec = $('ad-secret').value.trim();
-        try { if (sec) localStorage.setItem(ADMIN_KEY, sec); else localStorage.removeItem(ADMIN_KEY); } catch (e) {}
+        if (sec) admSet(sec); else admDel();
         const hn = document.getElementById('header-user-name'); if (hn) hn.textContent = sv.fullName;
         await persistAppState(); $('ad-msg').textContent = 'تم الحفظ ✔'; syncNow();
       };
@@ -4215,6 +4225,6 @@
 
     document.addEventListener(`DOMContentLoaded`, initializeApp);
   </script>
-<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (ك)</div>
+<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (ل)</div>
 </body>
 </html>
