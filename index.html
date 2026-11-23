@@ -4055,7 +4055,7 @@
       await persistAppState();
     }
     function parseSetupCode(raw) {
-      let s = String(raw || '').trim();
+      let s = String(raw || '').replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, '').trim();
       const i = s.indexOf('sync=');
       if (i >= 0) s = s.slice(i + 5);
       else if (/^https?:/i.test(s) || s.indexOf('#') >= 0) throw new Error('nosync');
@@ -4064,7 +4064,7 @@
       const tries = [s.replace(/\s/g, ''), s.replace(/\s/g, '+')];
       for (let k = 0; k < tries.length; k++) {
         try {
-          let b = tries[k].replace(/-/g, '+').replace(/_/g, '/'); while (b.length % 4) b += '=';
+          let b = tries[k].replace(/-/g, '+').replace(/_/g, '/').replace(/[^A-Za-z0-9+\/=]/g, ''); while (b.length % 4) b += '=';
           const c = JSON.parse(decodeURIComponent(escape(atob(b))));
           if (c && c.url && c.token) return c;
         } catch (e) {}
@@ -4223,6 +4223,6 @@
 
     document.addEventListener(`DOMContentLoaded`, initializeApp);
   </script>
-<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (و)</div>
+<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (ز)</div>
 </body>
 </html>
