@@ -1300,7 +1300,7 @@
           <span id="header-user-role" class="badge badge-gold"></span>
         </div>
 
-        <span id="sync-status" class="badge badge-gold" style="cursor:pointer" onclick="openSetupPaste()" title="اضغط للصق رابط الإعداد">المزامنة: غير مفعلة</span>
+        <span id="sync-status" class="badge badge-gold" style="cursor:pointer" onclick="openSetupPaste()" title="اضغط لإدخال رمز الإعداد">المزامنة: غير مفعلة</span>
           <button type="button" id="btn-admin" class="btn btn-ghost-light hidden" onclick="openAdminSettings()">إعدادات المشرف</button>
           <button type="button" id="btn-sync" class="btn btn-ghost-light hidden" onclick="openSyncSettings()">المزامنة</button>
           <button type="button" id="btn-backup" class="btn btn-ghost-light hidden" onclick="backupNow(true)">نسخة احتياطية</button>
@@ -3957,11 +3957,12 @@
     })();
 
     // ---- Sync with Google Apps Script (attendance records) ----
+    const SYNC_URL = 'https://script.google.com/macros/s/AKfycbwgHGXfZhJWtH6_WUkU8fQgFfsNz13Vk63bpHik-Kif0MHG3Y1-xZw8bgOSo3zzo1LVIw/exec';
     const SYNC_CFG_KEY = 'salalah-sync-config', SYNC_Q_KEY = 'salalah-sync-queue', SYNC_T_KEY = 'salalah-sync-times', SYNC_P_KEY = 'salalah-sync-pull';
     let syncApplying = false, syncBusy = false, syncTimer = null, teacherAuth = null, teacherPull = false;
     function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
     function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-    function syncCfg() { const c = lsGet(SYNC_CFG_KEY, null); return c && c.url && c.token ? c : null; }
+    function syncCfg() { const c = lsGet(SYNC_CFG_KEY, null); return c && c.token ? { url: SYNC_URL, token: c.token } : null; }
     function syncLabel() {
       if (!syncCfg()) return 'المزامنة: غير مفعلة';
       const n = lsGet(SYNC_Q_KEY, []).length;
@@ -4073,49 +4074,36 @@
       }
       const err = new Error('corrupt'); err.stage = stage; err.len = base.length; throw err;
     }
-    function openSetupPaste() {
-      if (session && session.loggedIn) return;
+    async function applySetupCode(input, msgEl) {
+      const v = String(input || '').trim();
+      let cfg;
+      try { cfg = /sync=/.test(v) ? parseSetupCode(v) : { token: v.replace(/[\s\-]/g, '') }; }
+      catch (e) { msgEl.textContent = 'النص غير صالح.'; return false; }
+      if (!cfg.token) { msgEl.textContent = 'اكتب الرمز أولاً.'; return false; }
+      const prev = lsGet(SYNC_CFG_KEY, null);
+      const restore = function () { if (prev) lsSet(SYNC_CFG_KEY, prev); else { try { localStorage.removeItem(SYNC_CFG_KEY); } catch (e2) {} } };
+      lsSet(SYNC_CFG_KEY, { token: cfg.token });
+      msgEl.textContent = 'جارٍ التحقق…';
+      try {
+        const r = await syncCall({ action: 'ping' });
+        if (r && r.ok) { msgEl.textContent = 'الرمز صحيح ✔'; syncStatus(syncLabel()); return true; }
+        restore(); msgEl.textContent = 'الرمز غير صحيح. تأكد منه وأعد المحاولة.'; return false;
+      } catch (e) { restore(); msgEl.textContent = 'تعذر الاتصال بالخادم. تحقق من الإنترنت.'; return false; }
+    }
+    function openSetupPaste(isSup) {
+      if (!isSup && session && session.loggedIn) return;
       const w = document.createElement('div');
       w.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
-      w.innerHTML = '<div style="background:#fff;color:#000;max-width:520px;width:100%;padding:1rem;border-radius:8px;display:grid;gap:.6rem;"><b>إعداد المزامنة</b><label>الصق رابط الإعداد الذي أرسله المشرف<textarea id="sp-in" dir="ltr" rows="4" style="width:100%"></textarea></label><div id="sp-msg" style="min-height:1.2em;"></div><div style="display:flex;gap:.5rem;"><button type="button" id="sp-ok">حفظ</button><button type="button" id="sp-x">إغلاق</button></div></div>';
+      w.innerHTML = '<div style="background:#fff;color:#000;max-width:480px;width:100%;padding:1rem;border-radius:8px;display:grid;gap:.6rem;"><b>إعداد المزامنة</b><label>' + (isSup ? 'رمز المزامنة (كلمة سرّ المزامنة)' : 'اكتب رمز الإعداد الذي أعطاك إياه المشرف') + '<input id="sp-in" dir="ltr" autocomplete="off" autocapitalize="characters" style="width:100%;font-size:1.1rem;letter-spacing:1px;padding:.4rem"></label><div id="sp-msg" style="min-height:1.2em;"></div><div style="display:flex;gap:.5rem;"><button type="button" id="sp-ok">حفظ</button><button type="button" id="sp-x">إغلاق</button></div></div>';
       document.body.appendChild(w);
       w.querySelector('#sp-x').onclick = function () { w.remove(); };
-      w.querySelector('#sp-ok').onclick = function () {
-        try {
-          lsSet(SYNC_CFG_KEY, parseSetupCode(w.querySelector('#sp-in').value));
-          if (!localStorage.getItem(SYNC_CFG_KEY)) { w.querySelector('#sp-msg').textContent = 'المتصفح لا يسمح بالحفظ (هل أنت في وضع التصفح الخاص؟).'; return; }
-          syncStatus(syncLabel()); w.querySelector('#sp-msg').textContent = 'تم الحفظ ✔'; setTimeout(function () { w.remove(); syncNow(); }, 1200);
-        } catch (e) { w.querySelector('#sp-msg').textContent = e && e.message === 'nosync' ? 'لم أجد جزء الإعداد (sync=) في النص. انسخ رابط الإعداد الكامل من صفحة المشرف، وليس عنوان الصفحة فقط.' : 'النص ناقص أو مشوّه. (المرحلة: ' + (e && e.stage || '?') + '، طول الرمز: ' + (e && e.len || 0) + '، طول النص: ' + w.querySelector('#sp-in').value.length + ')'; }
+      w.querySelector('#sp-ok').onclick = async function () {
+        const ok = await applySetupCode(w.querySelector('#sp-in').value, w.querySelector('#sp-msg'));
+        if (ok) setTimeout(function () { w.remove(); syncNow(); }, 900);
       };
     }
-    function openSyncSettings() {
-      const c = syncCfg() || { url: '', token: '' };
-      const w = document.createElement('div');
-      w.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
-      w.innerHTML = '<div style="background:#fff;color:#000;max-width:520px;width:100%;padding:1rem;border-radius:8px;display:grid;gap:.6rem;"><b>إعداد المزامنة</b><label>رابط الخادم (ينتهي بـ /exec)<input id="sy-url" dir="ltr" style="width:100%"></label><label>كلمة السرّ<input id="sy-tok" dir="ltr" type="password" style="width:100%"></label><div id="sy-msg" style="min-height:1.2em;"></div><input id="sy-link" readonly dir="ltr" class="hidden" style="width:100%"><div style="display:flex;gap:.5rem;flex-wrap:wrap;"><button type="button" id="sy-test">اختبار وحفظ</button><button type="button" id="sy-mk">رابط إعداد للمعلمين</button><button type="button" id="sy-cp">نسخ الرابط</button><button type="button" id="sy-x">إغلاق</button></div></div>';
-      document.body.appendChild(w);
-      const $ = function (id) { return w.querySelector('#' + id); };
-      $('sy-url').value = c.url; $('sy-tok').value = c.token;
-      $('sy-cp').onclick = async function () {
-        const l = $('sy-link'); if (!l.value) { $('sy-msg').textContent = 'اضغط «رابط إعداد للمعلمين» أولاً.'; return; }
-        try { await navigator.clipboard.writeText(l.value); $('sy-msg').textContent = 'تم نسخ الرابط ✔'; }
-        catch (e) { l.classList.remove('hidden'); l.select(); try { document.execCommand('copy'); $('sy-msg').textContent = 'تم نسخ الرابط ✔'; } catch (e2) { $('sy-msg').textContent = 'حدّد الرابط وانسخه يدوياً.'; } }
-      };
-      $('sy-x').onclick = function () { w.remove(); };
-      $('sy-test').onclick = async function () {
-        lsSet(SYNC_CFG_KEY, { url: $('sy-url').value.trim(), token: $('sy-tok').value.trim() });
-        $('sy-msg').textContent = 'جارٍ الاختبار…';
-        try { const r = await syncCall({ action: 'ping' }); $('sy-msg').textContent = r.ok ? 'تم الاتصال بنجاح ✔' : 'الخادم رفض الطلب: تحقق من كلمة السرّ.'; if (r.ok) syncNow(); }
-        catch (e) { $('sy-msg').textContent = 'تعذر الاتصال: تحقق من الرابط والإنترنت.'; }
-        syncStatus(syncLabel());
-      };
-      $('sy-mk').onclick = function () {
-        const cfg = syncCfg(); if (!cfg) { $('sy-msg').textContent = 'احفظ الإعداد أولاً.'; return; }
-        const l = $('sy-link'); l.classList.remove('hidden');
-        l.value = location.origin + location.pathname + '#sync=' + btoa(unescape(encodeURIComponent(JSON.stringify(cfg)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        l.select(); $('sy-msg').textContent = 'انسخ الرابط وأرسله للمعلم؛ يفتحه مرة واحدة فقط على جهازه.';
-      };
-    }
+    function openSyncSettings() { openSetupPaste(true); }
+
     // ---- School data sync (sections, students, teachers) ----
     const CFG_VER_KEY = 'salalah-cfg-version', CFG_SIG_KEY = 'salalah-cfg-sig', PW_MAP_KEY = 'salalah-pw-map', ADMIN_KEY = 'salalah-admin-secret';
     function cfgPayload() {
@@ -4225,6 +4213,6 @@
 
     document.addEventListener(`DOMContentLoaded`, initializeApp);
   </script>
-<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (ح)</div>
+<div style="text-align:center;font-size:.7rem;color:#888;padding:.5rem;">الإصدار 23-11-2026 (ط)</div>
 </body>
 </html>
